@@ -121,6 +121,35 @@ textarea{resize:vertical;line-height:1.45;min-height:3.2em;display:block}
 #pages{display:flex;flex-direction:column;align-items:center;gap:22px}
 #stage{position:absolute;left:-30000px;top:0;visibility:hidden;pointer-events:none}
 
+.art-btn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:0;background:none;padding:2px 5px;border-radius:5px;cursor:pointer;text-align:left}
+.art-btn:hover{background:var(--panel2)}
+.th{width:18px;height:25px;border-radius:2px;object-fit:cover;flex:none;background:var(--line);display:block}
+.chip-art{display:inline-flex;align-items:center;gap:6px;min-width:0;border:0;background:none;padding:0;cursor:pointer;text-align:left}
+.chip-art:hover span{text-decoration:underline}
+@media screen{#pages img.card[data-k]{cursor:pointer}#pages img.card[data-k]:hover{outline:2px solid var(--accent);outline-offset:2px}}
+.dlg{position:fixed;inset:0;z-index:30;background:rgba(10,12,18,.55);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dlg-box{background:var(--panel);color:var(--text);border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.4);width:min(980px,100%);max-height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.dlg-head{flex:none;display:flex;align-items:center;gap:10px;padding:14px 12px 10px 16px;border-bottom:1px solid var(--line)}
+.dlg-head h2{margin:3px 0 0;font:700 22px/1.05 var(--disp);letter-spacing:.03em;text-transform:uppercase;overflow-wrap:anywhere}
+.dlg-t{flex:1;min-width:0}
+.dlg-head .icon{width:40px;height:40px;font-size:18px}
+.dlg-tools{flex:none;display:flex;align-items:center;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);font-size:14px}
+.dlg-body{flex:1;min-height:0;overflow:auto;padding:14px 12px 20px}
+.arts{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:12px 8px}
+.art{position:relative;display:flex;flex-direction:column;gap:6px;border:0;background:none;color:inherit;padding:5px;border-radius:9px;cursor:pointer;text-align:left;font:inherit}
+.art:hover{background:var(--panel2)}
+.art.on{background:var(--panel2);box-shadow:inset 0 0 0 2px var(--accent)}
+.art img{width:100%;aspect-ratio:146/204;border-radius:5%/3.6%;object-fit:cover;background:var(--panel2);display:block}
+.art .cap{font-size:12.5px;line-height:1.35;color:var(--muted)}
+.art .cap b{display:block;color:var(--text);font-weight:600;font-size:13px}
+.art .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.art .tag{font:600 11px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:3px 5px 2px;color:var(--text)}
+.art .cur{position:absolute;top:11px;left:11px;background:var(--accent);color:var(--accent-ink);font:700 11.5px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;padding:4px 6px 3px;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+@media (max-width:600px){
+  .dlg{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+  .dlg-box{border-radius:0;width:100%;height:100%}
+  .arts{grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px 4px}
+}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20;background:#1d2129;color:#fff;padding:10px 14px;border-radius:9px;box-shadow:0 8px 26px rgba(0,0,0,.35);display:flex;gap:12px;align-items:center;font-size:14px;max-width:min(92vw,560px)}
 .toast button{border:0;background:none;color:#9dbcff;font-weight:600;cursor:pointer;padding:2px 4px}
 
@@ -269,6 +298,16 @@ textarea{resize:vertical;line-height:1.45;min-height:3.2em;display:block}
 </main>
 <div id="stage" class="sheet" aria-hidden="true"></div>
 <div id="toast" class="toast" hidden></div>
+<div id="artDlg" class="dlg" hidden>
+  <div class="dlg-box" role="dialog" aria-modal="true" aria-labelledby="artName">
+    <div class="dlg-head">
+      <div class="dlg-t"><div class="lab">Choose art</div><h2 id="artName"></h2></div>
+      <button type="button" class="icon" id="artClose" aria-label="Close">✕</button>
+    </div>
+    <div class="dlg-tools"><label class="check"><input type="checkbox" id="artAll"><span>Show every printing, also ones with the same art</span></label><span id="artCount" class="hint"></span></div>
+    <div class="dlg-body" id="artBody"></div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -374,21 +413,21 @@ function parseDeck(text){
       if(strict){board=keepBoard(board);continue}
     }
     if(board==='about') continue;
-    let cmd=board==='cmd',set='',maybe=board==='maybe';
-    if((m=line.match(/^\[([^\]]*)\]\s*(.+)$/))){set=m[1].split('#')[0];line=m[2]}
+    let cmd=board==='cmd',set='',cn='',maybe=board==='maybe';
+    if((m=line.match(/^\[([^\]]*)\]\s*(.+)$/))){const sp=m[1].split('#');set=sp[0];cn=sp[1]||'';line=m[2]}
     const hi=line.indexOf('#');
     if(hi>=0){if(/!\s*commander/i.test(line.slice(hi)))cmd=true;line=line.slice(0,hi)}
     if(/\*CMDR\*/i.test(line)) cmd=true;
     line=line.replace(/\*[^*]*\*/g,' ').replace(/\^[^^]*\^/g,' ').replace(/<[^>]*>/g,' ');
     line=line.replace(/\s\[([^\]]*)\]\s*$/,(_,c)=>{if(/commander/i.test(c))cmd=true;if(/maybe/i.test(c))maybe=true;else if(/sideboard/i.test(c))side=true;return ' '});
-    if((m=line.match(/^(.*?)\s+\(([A-Za-z0-9]{2,6})\)(?:\s+\S+)?\s*$/))){line=m[1];if(!set)set=m[2]}
+    if((m=line.match(/^(.*?)\s+\(([A-Za-z0-9]{2,6})\)(?:\s+(\S+))?\s*$/))){line=m[1];if(!set){set=m[2];cn=m[3]||''}}
     const name=line.replace(/\s+/g,' ').trim().replace(/\s*\/{1,3}\s*/g,' // ');
     if(!name||(maybe&&!cmd)) continue;
     const b=cmd?'main':(side||board==='side')?'side':'main';
     const front=name.split(' // ')[0];
     const key=norm(front)+'|'+b,ex=map.get(key);
     if(ex){ex.qty+=qty;ex.cmd=ex.cmd||cmd}
-    else map.set(key,{name,front,qty,board:b,cmd,set:/^[a-z0-9]{2,6}$/i.test(set)?set.toLowerCase():''});
+    else{const okSet=/^[a-z0-9]{2,6}$/i.test(set);map.set(key,{name,front,qty,board:b,cmd,set:okSet?set.toLowerCase():'',cn:okSet&&/^[\w★-]{1,14}$/u.test(cn)?cn:''})}
   }
   return {entries:[...map.values()],title};
 }
@@ -460,15 +499,22 @@ function cardRec(c){
   const type=(f&&f.type_line)||String(c.type_line||'').split(' // ')[0];
   const cost=c.layout==='split'?(c.mana_cost||''):((f&&f.mana_cost)||c.mana_cost||'');
   return {n:c.layout==='split'?c.name:front,full:c.name,front,t:type,g:groupOf(type),mv:c.cmc||0,c:cost,
-    ci:(c.color_identity||[]).join(''),img:iu.normal||'',art:iu.art_crop||'',artist:(f&&f.artist)||c.artist||''};
+    ci:(c.color_identity||[]).join(''),img:iu.normal||'',art:iu.art_crop||'',artist:(f&&f.artist)||c.artist||'',
+    sid:c.id||'',oid:c.oracle_id||(f&&f.oracle_id)||'',set:c.set||'',cn:c.collector_number||'',ill:(f&&f.illustration_id)||c.illustration_id||''};
 }
-function addCard(p,c){const r=cardRec(c),k=norm(r.front);p.cards[k]=r;return k}
+const ART_KEYS=['img','art','artist','sid','set','cn','ill','pick'];
+const small=u=>String(u||'').replace('/normal/','/small/');
+function addCard(p,c){
+  const r=cardRec(c),k=norm(r.front),old=p.cards[k];
+  if(old&&old.pick) ART_KEYS.forEach(x=>{r[x]=old[x]});
+  p.cards[k]=r;return k;
+}
 async function resolveEntries(entries,prog,onWait){
   const found=new Map();
-  const run=async(list,useSet)=>{
+  const run=async(list,ident)=>{
     for(let i=0;i<list.length;i+=75){
       const part=list.slice(i,i+75);
-      const j=await sfPost(part.map(e=>useSet&&e.set?{name:e.front,set:e.set}:{name:e.front}),onWait);
+      const j=await sfPost(part.map(ident),onWait);
       const idx=new Map();
       for(const c of j.data||[]){
         [c.name,c.name.split(' // ')[0],...(c.card_faces||[]).map(f=>f.name)].forEach((n,x)=>{const k=norm(n);if(x<2||!idx.has(k))idx.set(k,c)});
@@ -477,9 +523,9 @@ async function resolveEntries(entries,prog,onWait){
       prog(found.size);
     }
   };
-  await run(entries,true);
-  const hadSet=entries.filter(e=>!found.has(e)&&e.set);
-  if(hadSet.length) await run(hadSet,false);
+  // the exact printing first, then the set, then just the name
+  const passes=[[e=>e.set&&e.cn,e=>({set:e.set,collector_number:e.cn})],[e=>e.set,e=>({name:e.front,set:e.set})],[()=>true,e=>({name:e.front})]];
+  for(const [want,ident] of passes){const list=entries.filter(e=>!found.has(e)&&want(e));if(list.length) await run(list,ident)}
   for(const e of entries.filter(e=>!found.has(e)).slice(0,20)){
     let c;
     try{c=await lookupOne(e.name,onWait)}catch(err){break}
@@ -597,7 +643,7 @@ function proseEls(text){
 function cardImg(k){
   const c=P.cards[k];
   if(!c||!c.img) return `<span class="card">${esc(c?c.n:k)}</span>`;
-  return `<img class="card" src="${esc(c.img)}" alt="${esc(c.n)}">`;
+  return `<img class="card" src="${esc(c.img)}" alt="${esc(c.n)}" data-k="${esc(k)}">`;
 }
 function identity(){
   const cmds=P.deck.filter(e=>e.cmd),src=cmds.length?cmds:P.deck;
@@ -608,7 +654,7 @@ function identity(){
   return o.length?o:['C'];
 }
 function coverEls(){
-  const cmds=P.deck.filter(e=>e.cmd).map(e=>P.cards[e.k]).filter(Boolean).slice(0,2);
+  const cmdE=P.deck.filter(e=>e.cmd&&P.cards[e.k]).slice(0,2),cmds=cmdE.map(e=>P.cards[e.k]);
   const cmdNames=cmds.map(c=>c.n).join(' & ');
   const title=P.title.trim()||cmdNames||'Untitled deck';
   const ci=identity();
@@ -623,7 +669,7 @@ function coverEls(){
     <div class="txt">${eyebrow?`<div class="eyebrow">${eyebrow}</div>`:''}<h1>${esc(title)}</h1>
       ${P.tagline.trim()?`<p class="tag">${inline(P.tagline.trim())}</p>`:''}
       ${meta.length?`<div class="meta">${meta.join('')}</div>`:''}</div>
-    ${cmds.length?`<div class="cmd${cmds.length>1?' two':''}">${cmds.map(c=>c.img?`<img class="card" src="${esc(c.img)}" alt="${esc(c.n)}">`:'').join('')}</div>`:''}
+    ${cmds.length?`<div class="cmd${cmds.length>1?' two':''}">${cmds.map((c,i)=>c.img?`<img class="card" src="${esc(c.img)}" alt="${esc(c.n)}" data-k="${esc(cmdE[i].k)}">`:'').join('')}</div>`:''}
     ${arts.length?`<div class="credit">Art: ${esc([...new Set(arts.map(c=>c.artist).filter(Boolean))].join(' / '))}</div>`:''}
   </div>`);
   const stripe=h(`<div class="stripe">${(ci||['C']).map(c=>`<i style="background:${CI[c]}"></i>`).join('')}</div>`);
@@ -786,7 +832,7 @@ function renderPreview(){
   // keep the pictures already on screen, so typing never makes them blink
   const pool=new Map();
   $$('img',live).forEach(im=>{const a=pool.get(im.src)||[];a.push(im);pool.set(im.src,a)});
-  $$('img',stage).forEach(im=>{const a=pool.get(im.src);if(a&&a.length){const old=a.pop();old.className=im.className;old.alt=im.alt;im.replaceWith(old)}});
+  $$('img',stage).forEach(im=>{const a=pool.get(im.src);if(a&&a.length){const old=a.pop();old.className=im.className;old.alt=im.alt;if(im.dataset.k)old.dataset.k=im.dataset.k;else delete old.dataset.k;im.replaceWith(old)}});
   live.dataset.size=P.size;
   live.replaceChildren(...stage.children);
   const [w,hh]=SIZES[P.size];
@@ -803,10 +849,11 @@ const fArea=(label,path,rows,ph='',hint='')=>`<label class="field"><span>${label
 const fCheck=(label,path)=>`<label class="check"><input type="checkbox" id="${fid(path)}" data-bind="${path}" ${getPath(path)?'checked':''}><span>${label}</span></label>`;
 const FORMAT_HINT='Leave an empty line between paragraphs. <b>## Heading</b> makes a heading, <b>- text</b> a bullet, <b>**bold**</b> and <b>*italic*</b> work, <b>[[Card name]]</b> marks a card and <b>{U}{B}</b> shows mana symbols.';
 const INLINE_HINT='<b>[[Card name]]</b> marks a card, <b>{U}{B}</b> shows mana symbols, <b>**bold**</b> works too.';
+const artBtn=k=>{const c=P.cards[k],n=c?c.n:k;return `<button type="button" class="chip-art" data-act="art" data-k="${esc(k)}" title="Choose the art for ${esc(n)}">${c&&c.img?`<img src="${esc(small(c.img))}" alt="">`:''}<span>${esc(n)}</span></button>`};
 function picker(path,label){
   const keys=getPath(path)||[];
   return `<div class="field"><span>${label}</span><div class="picker" data-list="${path}">
-    <div class="chips">${keys.map((k,i)=>{const c=P.cards[k],n=c?c.n:k;return `<span class="chip">${c&&c.img?`<img src="${esc(c.img)}" alt="">`:''}<span>${esc(n)}</span><button type="button" class="x" data-act="unpick" data-path="${path}" data-i="${i}" aria-label="Remove ${esc(n)}">×</button></span>`}).join('')}</div>
+    <div class="chips">${keys.map((k,i)=>{const c=P.cards[k],n=c?c.n:k;return `<span class="chip">${artBtn(k)}<button type="button" class="x" data-act="unpick" data-path="${path}" data-i="${i}" aria-label="Remove ${esc(n)}">×</button></span>`}).join('')}</div>
     <input type="text" class="pick-in" id="${fid(path)}-add" autocomplete="off" spellcheck="false" placeholder="${P.deck.length?'Type a card name to add it…':'Type a card name (load your deck first for suggestions)'}">
     <div class="sugg" hidden></div></div></div>`;
 }
@@ -827,19 +874,20 @@ const TABHTML={
       ${P.missing.map((m,i)=>`<div class="mrow"><input type="text" id="${fid('missing.'+i+'.name')}" data-bind="missing.${i}.name" value="${esc(m.name)}" aria-label="Card name"><button type="button" class="btn small" data-act="fix" data-i="${i}">Find</button><button type="button" class="btn small ghost" data-act="dropmiss" data-i="${i}">Remove</button></div>`).join('')}</div>`:''}
     ${P.deck.length?`
       ${cmds.length?'':'<div class="note warn"><b>No commander marked yet.</b> Click the ♛ next to your commander in the list below. It goes on the cover.</div>'}
-      <div class="dl"><div class="row" style="justify-content:space-between;margin-top:9px"><h3 class="h">${n} cards</h3><span class="hint">♛ = commander</span></div>
-      ${groupedDeck().map(g=>`<h4>${g.label}<span>${g.count}</span></h4>${g.items.map(e=>{const c=P.cards[e.k];return `<div class="dl-r"><button type="button" class="crown${e.cmd?' on':''}" data-act="cmd" data-k="${esc(e.k)}" data-b="${e.b}" title="${e.cmd?'Commander. Click to unmark.':'Mark as commander'}" aria-label="${e.cmd?'Unmark':'Mark'} ${esc(c.n)} as commander" aria-pressed="${!!e.cmd}">♛</button><span class="nm">${esc(c.n)}${e.q>1?' ×'+e.q:''}</span><span class="mv">${c.g==='land'?'':c.mv}</span></div>`}).join('')}`).join('')}
+      <div class="dl"><div class="row" style="justify-content:space-between;margin-top:9px"><h3 class="h">${n} cards</h3><span class="hint">Tap a card to choose its art · ♛ commander</span></div>
+      ${groupedDeck().map(g=>`<h4>${g.label}<span>${g.count}</span></h4>${g.items.map(e=>{const c=P.cards[e.k];return `<div class="dl-r"><button type="button" class="crown${e.cmd?' on':''}" data-act="cmd" data-k="${esc(e.k)}" data-b="${e.b}" title="${e.cmd?'Commander. Click to unmark.':'Mark as commander'}" aria-label="${e.cmd?'Unmark':'Mark'} ${esc(c.n)} as commander" aria-pressed="${!!e.cmd}">♛</button><button type="button" class="art-btn" data-act="art" data-k="${esc(e.k)}" title="Choose the art for ${esc(c.n)}">${c.img?`<img class="th" src="${esc(small(c.img))}" alt="" loading="lazy">`:'<span class="th"></span>'}<span class="nm">${esc(c.n)}${e.q>1?' ×'+e.q:''}</span></button><span class="mv">${c.g==='land'?'':c.mv}</span></div>`}).join('')}`).join('')}
       </div>`:''}`;
   },
   cover(){
-    const cmds=P.deck.filter(e=>e.cmd).map(e=>(P.cards[e.k]||{}).n).filter(Boolean);
+    const cmds=P.deck.filter(e=>e.cmd).map(e=>(P.cards[e.k]||{}).n).filter(Boolean),ck=P.deck.filter(e=>e.cmd&&P.cards[e.k]).map(e=>e.k);
     return `
     ${fText('Deck name','title',cmds.join(' & ')||'e.g. Kinnan Turbo')}
     ${fText('One line about the deck','tagline','e.g. Fast mana into an early infinite combo')}
     ${fText('Deck by','author','Your name')}
     <label class="field"><span>Bracket</span><select id="f-bracket" data-bind="bracket">
       <option value="">Do not show a bracket</option>${Object.keys(BR).map(k=>`<option value="${k}" ${P.bracket===k?'selected':''}>Bracket ${k} · ${BR[k]}</option>`).join('')}</select></label>
-    <p class="hint">${cmds.length?`The cover shows <b>${esc(cmds.join(' & '))}</b> and its art and colors. Change the commander on the Deck tab (♛).`:'The cover shows your commander’s card, art and colors once you mark it on the Deck tab (♛).'}</p>`;
+    <p class="hint">${cmds.length?`The cover shows <b>${esc(cmds.join(' & '))}</b> and its art and colors. Change the commander on the Deck tab (♛).`:'The cover shows your commander’s card, art and colors once you mark it on the Deck tab (♛).'}</p>
+    ${ck.length?`<div class="field"><span>Commander art</span><div class="chips">${ck.map(k=>`<span class="chip">${artBtn(k)}</span>`).join('')}</div><small>Tap to choose the art. The cover background uses the same art. Any card’s art can be changed by tapping it in the Deck tab or on the pages.</small></div>`:''}`;
   },
   writeup(){
     return `${fText('Section title','titles.writeup')}
@@ -858,7 +906,7 @@ const TABHTML={
         ${fText('Result',`combos.${i}.result`,'e.g. Infinite colorless mana')}
       </div></details>`).join('')}
     <div class="row"><button type="button" class="btn" data-act="add-combo">+ Add a combo line</button></div>
-    <p class="hint">${INLINE_HINT} Steps are numbered for you.</p>`;
+    <p class="hint">${INLINE_HINT} Steps are numbered for you. Tap a card’s name to choose its art.</p>`;
   },
   top(){
     const n=P.top.length;
@@ -872,7 +920,7 @@ const TABHTML={
         ${fArea('Description',`top.${i}.text`,4,'Why is this card here? How is it used?')}
       </div></details>`).join('')}
     <div class="row"><button type="button" class="btn" data-act="add-top">+ Add an entry</button>${n?'':'<button type="button" class="btn" data-act="add-top10">+ Add 10 empty entries</button>'}</div>
-    <p class="hint">${INLINE_HINT}</p>`;
+    <p class="hint">${INLINE_HINT} Tap a card’s name to choose its art.</p>`;
   },
   pages(){
     return `
@@ -997,6 +1045,7 @@ panel.addEventListener('click',e=>{
   else if(a==='add-top10'){for(let j=0;j<10;j++)P.top.push({id:uid(),title:'',cards:[],text:''});P.top.slice(1).forEach(t=>ui.closed.add(t.id));touch();renderEditor()}
   else if(a==='del'){const arr=getPath(path),[it]=arr.splice(i,1);touch();renderEditor();toast('Removed.',7000,'Undo',()=>{arr.splice(Math.min(i,arr.length),0,it);touch();renderEditor()})}
   else if(a==='up'||a==='down'){const arr=getPath(path),j=a==='up'?i-1:i+1;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];touch();renderEditor()}
+  else if(a==='art') openArt(b.dataset.k);
   else if(a==='unpick'){getPath(path).splice(i,1);touch();renderEditor()}
 });
 $('#tabs').addEventListener('click',e=>{
@@ -1060,6 +1109,107 @@ async function toPdf(){
   await sleep(60);window.print();
 }
 $('#bPdf').onclick=toPdf;
+/* choosing art: every printing of a card from Scryfall, newest first */
+const artUI={k:null,all:false,next:null,list:[],total:0,ret:null,ctrl:0};
+function printTags(c){
+  const t=[],fe=c.frame_effects||[];
+  if(c.border_color==='borderless') t.push('Borderless');
+  if(fe.includes('showcase')) t.push('Showcase');
+  if(fe.includes('extendedart')) t.push('Extended art');
+  if(c.full_art&&c.border_color!=='borderless') t.push('Full art');
+  if(fe.includes('etched')) t.push('Etched');
+  if(c.promo) t.push('Promo');
+  return t;
+}
+function isCurrent(rec,c){
+  const f=c.card_faces&&c.card_faces[0],ill=(f&&f.illustration_id)||c.illustration_id;
+  return (rec.sid&&rec.sid===c.id)||String(rec.img||'').includes(c.id)||(!artUI.all&&!!rec.ill&&ill===rec.ill);
+}
+function artQuery(rec,useFront){
+  const name=String(useFront?rec.front:(rec.full||rec.n)).replace(/"/g,'');
+  return (rec.oid&&!useFront?'oracleid:'+rec.oid:'!"'+name+'"')+' -is:digital';
+}
+function renderArts(){
+  const rec=P.cards[artUI.k];if(!rec) return;
+  $('#artCount').textContent=`${artUI.total} ${artUI.all?'printing':'art'}${artUI.total===1?'':'s'}`;
+  $('#artBody').innerHTML=`<div class="arts">${artUI.list.map((c,i)=>{
+    const f=c.card_faces&&c.card_faces[0],iu=c.image_uris||(f&&f.image_uris)||{},on=isCurrent(rec,c),artist=(f&&f.artist)||c.artist||'',tags=printTags(c);
+    return `<button type="button" class="art${on?' on':''}" data-i="${i}" aria-pressed="${on}" aria-label="${esc(c.set_name)}, ${esc((c.released_at||'').slice(0,4))}${artist?', art by '+esc(artist):''}">${on?'<span class="cur">Current</span>':''}<img src="${esc(iu.small||iu.normal||'')}" alt="" loading="lazy"><span class="cap"><b>${esc(c.set_name)}</b>${esc(String(c.set).toUpperCase())} · ${esc((c.released_at||'').slice(0,4))}${artist?'<br>'+esc(artist):''}${tags.length?`<span class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</span>`:''}</span></button>`;
+  }).join('')}</div>${artUI.next?'<div class="row" style="justify-content:center;margin-top:18px"><button type="button" class="btn" id="artMore">Show more</button></div>':''}`;
+}
+// pamphlets made before art choosing existed don't know their printing yet: look it up once
+const imgId=u=>(String(u||'').match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)||[])[0];
+async function fillIds(rec){
+  const id=rec.sid||imgId(rec.img);
+  if(!id||rec.ill) return;
+  try{
+    const r=await sfFetch(SF+'/cards/'+id,{headers:{Accept:'application/json'}});
+    if(!r.ok) return;
+    const x=cardRec(await r.json());
+    ['sid','oid','set','cn','ill'].forEach(f=>{if(x[f])rec[f]=x[f]});
+    touch();
+  }catch(e){}
+}
+async function loadArts(fresh){
+  const rec=P.cards[artUI.k],body=$('#artBody'),my=++artUI.ctrl;if(!rec) return;
+  if(fresh){artUI.list=[];artUI.next=null;artUI.total=0;body.innerHTML='<p class="msg">Finding the art…</p>';$('#artCount').textContent=''}
+  const say=m=>{if(my!==artUI.ctrl)return;if(fresh)body.innerHTML=`<p class="msg">${esc(m)}</p>`;else{const b=$('#artMore');if(b)b.textContent=m}};
+  const ask=async useFront=>{
+    const url=(!fresh&&artUI.next)||SF+'/cards/search?'+new URLSearchParams({q:artQuery(rec,useFront),unique:artUI.all?'prints':'art',order:'released',dir:'desc'});
+    return sfFetch(url,{headers:{Accept:'application/json'}},t=>say(pauseMsg(t)));
+  };
+  try{
+    if(fresh){await fillIds(rec);if(my!==artUI.ctrl) return}
+    let r=await ask(false);
+    if(r.status===404&&fresh&&rec.front&&(rec.oid||rec.front!==(rec.full||rec.n))) r=await ask(true);
+    if(my!==artUI.ctrl) return;
+    if(r.status===404){body.innerHTML='<p class="msg">Scryfall has no other printings of this card.</p>';return}
+    if(!r.ok) throw new SfError('status',r.status);
+    const j=await r.json();
+    if(my!==artUI.ctrl) return;
+    artUI.list.push(...(j.data||[]));artUI.next=j.has_more?j.next_page:null;artUI.total=j.total_cards||artUI.list.length;
+    renderArts();
+  }catch(err){
+    if(my!==artUI.ctrl) return;
+    if(fresh) body.innerHTML=`<p class="msg err">${esc(sfMessage(err))}</p>`;else say('Could not load more. Tap to try again.');
+  }
+}
+function openArt(k){
+  if(!P.cards[k]) return;
+  artUI.k=k;artUI.ret=document.activeElement;
+  $('#artName').textContent=P.cards[k].n;
+  $('#artAll').checked=artUI.all;
+  $('#artDlg').hidden=false;
+  try{history.pushState({dpArt:1},'')}catch(e){}
+  $('#artClose').focus({preventScroll:true});
+  loadArts(true);
+}
+function hideArt(){
+  if($('#artDlg').hidden) return;
+  $('#artDlg').hidden=true;artUI.ctrl++;
+  const k=artUI.k,again=k&&panel.querySelector(`[data-act="art"][data-k="${CSS.escape(k)}"]`);
+  const back=again||(artUI.ret&&artUI.ret.isConnected?artUI.ret:null);
+  if(back) back.focus({preventScroll:true});
+}
+function closeArt(){if(history.state&&history.state.dpArt)history.back();else hideArt()}
+window.addEventListener('popstate',hideArt);
+function chooseArt(c){
+  const rec=P.cards[artUI.k];if(!rec) return;
+  const r=cardRec(c);
+  ART_KEYS.forEach(x=>{if(x!=='pick')rec[x]=r[x]});
+  rec.pick=true;if(r.oid) rec.oid=r.oid;
+  touch();renderEditor();closeArt();
+  toast(`Art changed for ${rec.n}.`,3500);
+}
+$('#artBody').addEventListener('click',e=>{
+  if(e.target.closest('#artMore')){e.target.closest('#artMore').textContent='Loading…';loadArts(false);return}
+  const b=e.target.closest('.art');if(b) chooseArt(artUI.list[+b.dataset.i]);
+});
+$('#artAll').addEventListener('change',e=>{artUI.all=e.target.checked;loadArts(true)});
+$('#artClose').onclick=closeArt;
+$('#artDlg').addEventListener('click',e=>{if(e.target.id==='artDlg')closeArt()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#artDlg').hidden){e.preventDefault();closeArt()}});
+$('#pages').addEventListener('click',e=>{const im=e.target.closest('img.card[data-k]');if(im) openArt(im.dataset.k)});
 window.addEventListener('resize',fitPreview);
 window.addEventListener('beforeunload',()=>{clearTimeout(saveT);saveNow()});
 
