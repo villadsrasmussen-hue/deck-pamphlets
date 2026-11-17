@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Pamphlets</title>
+<meta name="theme-color" content="#1b2440">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap">
+<style id="pageRule">@page{size:210mm 297mm;margin:0}</style>
+<style>
+/* Layout: a workbench. The editor sits in a column on the left; the paper pages on the right are exactly what the PDF will contain. */
+:root{
+  --desk:#e4e6eb; --panel:#ffffff; --panel2:#f3f4f7; --line:#d2d6dd; --text:#171a20; --muted:#5a6371;
+  --accent:#2a55c4; --accent-ink:#ffffff; --danger:#b3261e; --ok:#1c7a46; --warn:#8a5a00;
+  --ui:'Barlow',system-ui,'Segoe UI',Arial,sans-serif;
+  --disp:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  /* the paper is always white, whatever the screen theme */
+  --ink:#14171c; --ink2:#4c5463; --rule:#d4d8df; --tint:#f2f3f6;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --desk:#111317; --panel:#1b1e24; --panel2:#252930; --line:#383d47; --text:#e8eaee; --muted:#9aa3b1;
+    --accent:#86a7ff; --accent-ink:#0c1222; --danger:#ff8a80; --ok:#6fd39b; --warn:#f0c36a; color-scheme:dark }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;background:var(--desk);color:var(--text);font:15px/1.4 var(--ui);overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- top bar ---------- */
+.bar{flex:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{font:700 21px/1 var(--disp);letter-spacing:.07em;text-transform:uppercase;margin-right:6px}
+.grow{flex:1}
+.btn{padding:7px 12px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ghost{background:transparent}
+.btn.small{padding:5px 9px;font-size:13px}
+.btn.danger{border-color:var(--danger);color:var(--danger)}
+.btn:disabled{opacity:.5;cursor:default}
+select,input[type=text],textarea{padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);width:100%}
+textarea{resize:vertical;line-height:1.45;min-height:3.2em;display:block}
+#pick{width:auto;max-width:250px;font-weight:600}
+.saved{font-size:12.5px;color:var(--muted)}
+.saved.bad{color:var(--danger)}
+.delask{display:inline-flex;align-items:center;gap:6px;font-size:13.5px}
+#bView,#bMore{display:none}
+.extra{display:contents}
+
+/* ---------- workbench ---------- */
+.work{flex:1;min-height:0;display:grid;grid-template-columns:minmax(340px,450px) minmax(0,1fr)}
+.editor{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--panel);border-right:1px solid var(--line)}
+.tabs{flex:none;display:flex;overflow-x:auto;border-bottom:1px solid var(--line);padding:0 8px}
+.tabs button{border:0;background:none;padding:11px 11px 9px;cursor:pointer;font:600 15.5px/1 var(--disp);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--accent)}
+.panel{flex:1;min-height:0;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span,.lab{font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.field small,.hint{font-size:12.5px;color:var(--muted);line-height:1.4;margin:0}
+.check{display:flex;align-items:center;gap:8px;cursor:pointer}
+.check input{width:17px;height:17px;accent-color:var(--accent);margin:0}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.msg{font-size:13.5px;color:var(--muted)}
+.msg.ok{color:var(--ok)} .msg.err{color:var(--danger)} .msg.warn{color:var(--warn)}
+.note{border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--panel2);padding:10px 12px;border-radius:6px;font-size:13.5px;line-height:1.45}
+.note.warn{border-left-color:var(--warn)}
+.note b{font-weight:600}
+.h{margin:0;font:700 17px/1.1 var(--disp);letter-spacing:.07em;text-transform:uppercase}
+
+.miss{display:flex;flex-direction:column;gap:7px;border:1px solid var(--line);border-radius:9px;padding:11px}
+.mrow{display:flex;gap:6px;align-items:center}
+.mrow input{flex:1;min-width:0}
+
+.dl{border:1px solid var(--line);border-radius:9px;padding:4px 11px 9px}
+.dl h4{margin:10px 0 3px;font:700 13.5px/1 var(--disp);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.dl-r{display:flex;align-items:center;gap:6px;font-size:14px;padding:1.5px 0}
+.dl-r .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl-r .mv{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12.5px}
+.crown{border:0;background:none;cursor:pointer;padding:0 2px;font-size:15px;line-height:1;color:var(--line);border-radius:4px}
+.crown:hover{color:var(--muted)}
+.crown.on{color:#c79a1e}
+
+.item{border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.item>summary{list-style:none;display:flex;align-items:center;gap:9px;padding:9px 10px;cursor:pointer;border-radius:10px}
+.item>summary::-webkit-details-marker{display:none}
+.item>summary::before{content:"▸";color:var(--muted);font-size:12px;width:10px}
+.item[open]>summary::before{content:"▾"}
+.item .tagn{flex:none;font:700 13px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:4px 7px}
+.item .st{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.item .tools{display:flex;gap:2px}
+.icon{border:0;background:none;cursor:pointer;width:28px;height:28px;border-radius:6px;color:var(--muted);font-size:15px;line-height:1}
+.icon:hover:not(:disabled){background:var(--panel2);color:var(--text)}
+.icon:disabled{opacity:.3;cursor:default}
+.icon.del:hover{color:var(--danger)}
+.item .in{padding:4px 12px 13px;display:flex;flex-direction:column;gap:11px}
+
+.picker{position:relative;display:flex;flex-direction:column;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips:empty{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:3px 3px 3px 4px;font-size:13.5px;max-width:100%}
+.chip img{width:19px;height:26px;border-radius:2px;object-fit:cover;flex:none}
+.chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .x{border:0;background:none;cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:2px 5px;border-radius:4px}
+.chip .x:hover{color:var(--danger)}
+.sugg{position:absolute;left:0;right:0;top:100%;margin-top:3px;z-index:5;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-height:270px;overflow:auto}
+.opt{padding:7px 10px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.opt small{color:var(--muted);font-size:12px;white-space:nowrap}
+.opt.on{background:var(--accent);color:var(--accent-ink)}
+.opt.on small{color:inherit;opacity:.85}
+.opt.none{cursor:default;color:var(--muted)}
+
+.secrow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 8px 6px 10px}
+.secrow .check{flex:1;min-width:0}
+
+.preview{min-width:0;min-height:0;overflow:auto;padding:22px}
+#pages{display:flex;flex-direction:column;align-items:center;gap:22px}
+#stage{position:absolute;left:-30000px;top:0;visibility:hidden;pointer-events:none}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20;background:#1d2129;color:#fff;padding:10px 14px;border-radius:9px;box-shadow:0 8px 26px rgba(0,0,0,.35);display:flex;gap:12px;align-items:center;font-size:14px;max-width:min(92vw,560px)}
+.toast button{border:0;background:none;color:#9dbcff;font-weight:600;cursor:pointer;padding:2px 4px}
+
+@media (max-width:900px){
+  .work{grid-template-columns:minmax(0,1fr)}
+  .editor{border-right:0}
+  .preview{display:none}
+  body.pv .editor{display:none}
+  body.pv .preview{display:block}
+  #bView,#bMore{display:inline-block}
+  .saved{display:none}
+  .bar{gap:7px;padding:8px 12px}
+  .brand{font-size:18px}
+  #pick{flex:1 1 55%;max-width:none;min-width:0}
+  .extra{display:none}
+  body.more .extra{display:flex;flex-wrap:wrap;gap:7px;order:9;width:100%}
+  body.more #bMore{background:var(--panel2);border-color:var(--muted)}
+}
+
+/* ---------- the paper ---------- */
+.sheet{--pw:210mm;--ph:297mm;--mx:13mm;--mt:12mm;--mb:12mm;--fs:9.6pt}
+.sheet[data-size="letter"]{--pw:215.9mm;--ph:279.4mm}
+.sheet[data-size="a5"]{--pw:148mm;--ph:210mm;--mx:9mm;--mt:9mm;--mb:10mm;--fs:8.4pt}
+.pagewrap{flex:none;width:calc(var(--pw)*var(--s,1));height:calc(var(--ph)*var(--s,1));overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2),0 8px 28px rgba(0,0,0,.18)}
+.page{width:var(--pw);height:var(--ph);transform:scale(var(--s,1));transform-origin:0 0;position:relative;display:flex;flex-direction:column;overflow:hidden;background:#fff;color:var(--ink);font:400 var(--fs)/1.42 var(--ui);text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page img{max-width:none}
+.page .content{flex:1 1 0;min-height:0;margin:var(--mt) var(--mx) 2.5mm;position:relative}
+.page .content>:first-child{margin-top:0!important;padding-top:0!important;border-top:0!important}
+.page .pfoot{flex:none;height:var(--mb);margin:0 var(--mx);border-top:.2mm solid var(--rule);padding-top:1.5mm;display:flex;justify-content:space-between;align-items:flex-start;gap:4mm;font-size:.66em;line-height:1.2;color:var(--ink2);letter-spacing:.02em}
+.page .pfoot .t{font-weight:600;max-width:34%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page .pfoot .fine{flex:1;text-align:center;opacity:.85}
+.page .pfoot .pg{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.page .card{display:block;flex:none;aspect-ratio:488/680;border-radius:4.6%/3.3%;background:#cfd3da;object-fit:cover}
+.page span.card{display:flex;align-items:center;justify-content:center;text-align:center;padding:1mm;font-size:.74em;line-height:1.2;color:var(--ink2);border:.25mm dashed #9aa1ad;background:var(--tint)}
+.page .ms{display:inline-block;width:1em;height:1em;vertical-align:-.14em;margin:0 .03em}
+.page .cn{font-weight:600}
+
+.page .cover{position:relative;flex:none;min-height:calc(var(--pw)*.36);background:#12151b;color:#fff;display:flex;align-items:flex-end;gap:6mm;padding:10mm var(--mx) 8mm;overflow:hidden}
+.page .cover .art{position:absolute;inset:0;display:flex}
+.page .cover .art img{flex:1 1 0;width:0;min-width:0;height:100%;object-fit:cover;object-position:50% 20%}
+.page .cover .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,16,21,.95),rgba(14,16,21,.84) 40%,rgba(14,16,21,.36) 76%,rgba(14,16,21,.52))}
+.page .cover .txt{position:relative;flex:1 1 0;min-width:0}
+.page .cover .eyebrow{display:flex;align-items:center;gap:2.6mm;flex-wrap:wrap;margin-bottom:3mm}
+.page .badge{font:600 .86em/1 var(--disp);letter-spacing:.15em;text-transform:uppercase;border:.3mm solid rgba(255,255,255,.85);padding:1.3mm 2.4mm 1.1mm;border-radius:1mm;white-space:nowrap}
+.page .badge i{font-style:normal;opacity:.78;margin-left:2.2mm}
+.page .pips{display:flex;gap:.8mm}
+.page .pips img{width:1.36em;height:1.36em;display:block}
+.page .cover h1{margin:0;font:700 3.25em/.95 var(--disp);letter-spacing:.006em;text-transform:uppercase;text-wrap:balance;overflow-wrap:anywhere}
+.page .cover .tag{margin:2.6mm 0 0;font-size:1.1em;line-height:1.3;max-width:34em;opacity:.93}
+.page .cover .meta{margin:3mm 0 0;font-weight:500;font-size:.92em;line-height:1.3;opacity:.9;display:flex;gap:1mm 5mm;flex-wrap:wrap}
+.page .cover .meta b{font:600 .82em var(--disp);letter-spacing:.15em;text-transform:uppercase;opacity:.75;margin-right:1.5mm}
+.page .cover .cmd{position:relative;flex:none;display:flex}
+.page .cover .cmd .card{width:calc(var(--pw)*.205);box-shadow:0 1mm 5mm rgba(0,0,0,.55)}
+.page .cover .cmd.two .card{width:calc(var(--pw)*.178)}
+.page .cover .cmd.two .card+.card{margin-left:calc(var(--pw)*-.022)}
+.page .cover .credit{position:absolute;right:var(--mx);bottom:2.3mm;font-size:.56em;opacity:.7;letter-spacing:.03em}
+.page .stripe{flex:none;height:1.5mm;display:flex}
+.page .stripe i{flex:1}
+
+.page .sec{margin:7mm 0 0;display:flex;align-items:center;gap:3mm;font:700 1.62em/1 var(--disp);letter-spacing:.05em;text-transform:uppercase}
+.page .sec::after{content:"";flex:1;height:.4mm;background:var(--ink)}
+.page .sec small{order:1;font:500 .5em/1 var(--ui);letter-spacing:.07em;color:var(--ink2)}
+
+.page .prose{margin-top:3.2mm;columns:var(--pcols,2);column-gap:7mm}
+.page .prose.one{max-width:64%}
+.sheet[data-size="a5"] .page .prose.one{max-width:none}
+.page .prose p{margin:0 0 .75em;orphans:2;widows:2}
+.page .prose h3{margin:1.1em 0 .35em;font:700 1.2em/1.1 var(--disp);letter-spacing:.06em;text-transform:uppercase;break-after:avoid}
+.page .prose>h3:first-child{margin-top:0}
+.page .prose ul{margin:0 0 .75em;padding-left:1.25em}
+.page .prose li{margin:0 0 .25em;break-inside:avoid}
+.page .prose>:last-child{margin-bottom:0}
+.page .empty{margin-top:8mm;color:var(--ink2);font-size:1.1em;max-width:30em}
+
+.page .combo,.page .top{margin-top:4mm;padding-top:4mm;border-top:.2mm solid var(--rule);display:flex;gap:5mm;align-items:flex-start}
+.page .top{gap:4mm}
+.page .sec+.combo,.page .sec+.top{margin-top:3.6mm;padding-top:0;border-top:0}
+.page .imgs{flex:none;display:flex;flex-wrap:wrap;gap:1.4mm;max-width:58%}
+.page .combo .imgs .card{width:calc(var(--pw)*.118)}
+.page .combo .imgs.n4 .card,.page .combo .imgs.n5 .card{width:calc(var(--pw)*.096)}
+.page .top .imgs .card{width:calc(var(--pw)*.15)}
+.page .top .imgs.n3 .card{width:calc(var(--pw)*.13)}
+.page .top .imgs.n4 .card,.page .top .imgs.n5 .card{width:calc(var(--pw)*.108)}
+.page .body{flex:1 1 0;min-width:0}
+.page .eb{font:600 .8em/1 var(--disp);letter-spacing:.17em;text-transform:uppercase;color:var(--ink2);margin-bottom:1.1mm}
+.page .body h4{margin:0 0 1.6mm;font:700 1.42em/1.05 var(--disp);letter-spacing:.02em;text-transform:uppercase;text-wrap:balance}
+.page .body p{margin:0 0 1.5mm}
+.page .plab{font:600 .8em var(--disp);letter-spacing:.15em;text-transform:uppercase;color:var(--ink2);margin-right:1.6mm}
+.page .combo ol{margin:0 0 1.5mm;padding-left:1.5em}
+.page .combo li{margin-bottom:.7mm;padding-left:.2em}
+.page .combo li::marker{font:700 1em var(--disp)}
+.page .res{font-weight:600}
+.page .body>:last-child{margin-bottom:0}
+.page .num{flex:none;width:1.3em;font:700 3.6em/.8 var(--disp);text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+.page .deckcols{margin-top:3.2mm;display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));column-gap:6mm;align-items:start}
+.page .dg{height:var(--gh);margin-top:var(--gg);display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:1mm;border-bottom:.3mm solid var(--ink);font:700 1em/1 var(--disp);letter-spacing:.08em;text-transform:uppercase}
+.page .dcol>.dg:first-child{margin-top:0}
+.page .dg span,.page .dg i{font:500 .86em/1 var(--ui);font-style:normal;letter-spacing:.04em;color:var(--ink2)}
+.page .dr{height:var(--rh);display:flex;align-items:center;gap:1.5mm;font-size:.9em;line-height:1;border-bottom:.15mm solid var(--rule)}
+.page .dr .nm{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:.4mm 0}
+.page .dr .q{color:var(--ink2);font-variant-numeric:tabular-nums;margin-left:.5mm}
+.page .dr .cost{flex:none;display:flex;align-items:center;gap:.25mm}
+.page .dr .cost .ms{width:2.85mm;height:2.85mm;margin:0;vertical-align:0}
+.page .dr .cost .sl{font-style:normal;font-size:.8em;color:var(--ink2);margin:0 .4mm}
+
+@media print{
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important;display:block!important}
+  .bar,.editor,.toast,#stage{display:none!important}
+  .work{display:block!important}
+  .preview{display:block!important;overflow:visible!important;padding:0!important}
+  #pages{display:block!important;--s:1!important}
+  .pagewrap{width:var(--pw)!important;height:calc(var(--ph) - .4mm)!important;box-shadow:none!important;break-after:page;break-inside:avoid}
+  .pagewrap:last-child{break-after:auto}
+  .page{transform:none!important}
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">Deck Pamphlets</div>
+  <select id="pick" aria-label="Choose a pamphlet"></select>
+  <button class="btn" id="bNew" type="button">New deck</button>
+  <span class="extra">
+    <button class="btn ghost" id="bDup" type="button">Duplicate</button>
+    <span id="delwrap"><button class="btn ghost" id="bDel" type="button">Delete</button></span>
+    <button class="btn ghost" id="bOpen" type="button" title="Open a pamphlet file saved with “Save to file”, for example from your other device">Open file</button>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+    <button class="btn ghost" id="bSave" type="button" title="Save this pamphlet as a file: a backup, or to move it to another device">Save to file</button>
+  </span>
+  <button class="btn ghost" id="bMore" type="button" aria-expanded="false">More</button>
+  <span class="grow"></span>
+  <span id="saved" class="saved"></span>
+  <button class="btn ghost" id="bView" type="button">Preview</button>
+  <button class="btn primary" id="bPdf" type="button" title="Opens the print window. Choose “Save as PDF” as the printer.">Save as PDF</button>
+</header>
+<main class="work">
+  <section class="editor" aria-label="Editor">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="panel" id="panel"></div>
+  </section>
+  <section class="preview" id="preview" aria-label="Pamphlet pages">
+    <div id="pages" class="sheet"></div>
+  </section>
+</main>
+<div id="stage" class="sheet" aria-hidden="true"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(function(){
+'use strict';
+/* ================= helpers ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const LS='deckPamphlets.v1';
+const MM=96/25.4;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const h=html=>{const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild};
+
+const SIZES={a4:[210,297,'A4'],letter:[215.9,279.4,'US Letter'],a5:[148,210,'A5 (small booklet)']};
+const BR={1:'Exhibition',2:'Core',3:'Upgraded',4:'Optimized',5:'cEDH'};
+const CI={W:'#e3d48a',U:'#1b7fd1',B:'#3a3340',R:'#d8402f',G:'#1f8f4f',C:'#a7afb9'};
+const GROUPS=[['commander','Commander'],['creature','Creatures'],['planeswalker','Planeswalkers'],['battle','Battles'],['artifact','Artifacts'],['enchantment','Enchantments'],['instant','Instants'],['sorcery','Sorceries'],['land','Lands'],['other','Other'],['side','Sideboard']];
+const SECNAME={writeup:'Writeup',combos:'Combos',top:'Top 10',deck:'Decklist'};
+const EXAMPLE=/*EXAMPLE*/{"title":"Kinnan Combo","tagline":"Example pamphlet: make more mana than everyone else, then go infinite.","author":"","bracket":"5","size":"a4","newPage":false,"deckText":"Commander\n1 Kinnan, Bonder Prodigy\n\nDeck\n1 Birds of Paradise\n1 Llanowar Elves\n1 Elvish Mystic\n1 Fyndhorn Elves\n1 Arbor Elf\n1 Bloom Tender\n1 Priest of Titania\n1 Elvish Spirit Guide\n1 Incubation Druid\n1 Gilded Goose\n1 Delighted Halfling\n1 Faerie Mastermind\n1 Thrasios, Triton Hero\n1 Seedborn Muse\n1 Hullbreaker Horror\n1 Thassa's Oracle\n1 Walking Ballista\n1 Spellseeker\n1 Phantasmal Image\n1 Dryad Arbor\n1 Displacer Kitten\n1 Brazen Borrower\n1 Oko, Thief of Crowns\n1 Invasion of Ikoria\n1 Sol Ring\n1 Mana Vault\n1 Grim Monolith\n1 Basalt Monolith\n1 Chrome Mox\n1 Mox Diamond\n1 Mox Opal\n1 Mox Amber\n1 Lotus Petal\n1 Lion's Eye Diamond\n1 Arcane Signet\n1 Talisman of Curiosity\n1 Springleaf Drum\n1 Umbral Mantle\n1 The One Ring\n1 Freed from the Real\n1 Pemmin's Aura\n1 Rhystic Study\n1 Mystic Remora\n1 Sylvan Library\n1 Carpet of Flowers\n1 Utopia Sprawl\n1 Force of Will\n1 Force of Negation\n1 Pact of Negation\n1 Mana Drain\n1 Swan Song\n1 Flusterstorm\n1 Mental Misstep\n1 Fierce Guardianship\n1 An Offer You Can't Refuse\n1 Brainstorm\n1 Worldly Tutor\n1 Mystical Tutor\n1 Crop Rotation\n1 Chain of Vapor\n1 Cyclonic Rift\n1 Veil of Summer\n1 Summoner's Pact\n1 Chord of Calling\n1 Green Sun's Zenith\n1 Finale of Devastation\n1 Ponder\n1 Gitaxian Probe\n1 Transmute Artifact\n1 Eldritch Evolution\n1 Neoform\n1 Command Tower\n1 Tropical Island\n1 Breeding Pool\n1 Misty Rainforest\n1 Flooded Strand\n1 Polluted Delta\n1 Scalding Tarn\n1 Verdant Catacombs\n1 Windswept Heath\n1 Wooded Foothills\n1 Yavimaya Coast\n1 Waterlogged Grove\n1 City of Brass\n1 Mana Confluence\n1 Forbidden Orchard\n1 Gemstone Caverns\n1 Ancient Tomb\n1 Gaea's Cradle\n1 Otawara, Soaring City\n1 Boseiju, Who Endures\n1 Minamo, School at Water's Edge\n1 Urza's Saga\n1 Talon Gates of Madara\n1 Cephalid Coliseum\n2 Snow-Covered Forest\n2 Snow-Covered Island\n","deck":[{"k":"kinnan bonder prodigy","q":1,"b":"main","cmd":true},{"k":"birds of paradise","q":1,"b":"main","cmd":false},{"k":"llanowar elves","q":1,"b":"main","cmd":false},{"k":"elvish mystic","q":1,"b":"main","cmd":false},{"k":"fyndhorn elves","q":1,"b":"main","cmd":false},{"k":"arbor elf","q":1,"b":"main","cmd":false},{"k":"bloom tender","q":1,"b":"main","cmd":false},{"k":"priest of titania","q":1,"b":"main","cmd":false},{"k":"elvish spirit guide","q":1,"b":"main","cmd":false},{"k":"incubation druid","q":1,"b":"main","cmd":false},{"k":"gilded goose","q":1,"b":"main","cmd":false},{"k":"delighted halfling","q":1,"b":"main","cmd":false},{"k":"faerie mastermind","q":1,"b":"main","cmd":false},{"k":"thrasios triton hero","q":1,"b":"main","cmd":false},{"k":"seedborn muse","q":1,"b":"main","cmd":false},{"k":"hullbreaker horror","q":1,"b":"main","cmd":false},{"k":"thassa s oracle","q":1,"b":"main","cmd":false},{"k":"walking ballista","q":1,"b":"main","cmd":false},{"k":"spellseeker","q":1,"b":"main","cmd":false},{"k":"phantasmal image","q":1,"b":"main","cmd":false},{"k":"dryad arbor","q":1,"b":"main","cmd":false},{"k":"displacer kitten","q":1,"b":"main","cmd":false},{"k":"brazen borrower","q":1,"b":"main","cmd":false},{"k":"oko thief of crowns","q":1,"b":"main","cmd":false},{"k":"invasion of ikoria","q":1,"b":"main","cmd":false},{"k":"sol ring","q":1,"b":"main","cmd":false},{"k":"mana vault","q":1,"b":"main","cmd":false},{"k":"grim monolith","q":1,"b":"main","cmd":false},{"k":"basalt monolith","q":1,"b":"main","cmd":false},{"k":"chrome mox","q":1,"b":"main","cmd":false},{"k":"mox diamond","q":1,"b":"main","cmd":false},{"k":"mox opal","q":1,"b":"main","cmd":false},{"k":"mox amber","q":1,"b":"main","cmd":false},{"k":"lotus petal","q":1,"b":"main","cmd":false},{"k":"lion s eye diamond","q":1,"b":"main","cmd":false},{"k":"arcane signet","q":1,"b":"main","cmd":false},{"k":"talisman of curiosity","q":1,"b":"main","cmd":false},{"k":"springleaf drum","q":1,"b":"main","cmd":false},{"k":"umbral mantle","q":1,"b":"main","cmd":false},{"k":"the one ring","q":1,"b":"main","cmd":false},{"k":"freed from the real","q":1,"b":"main","cmd":false},{"k":"pemmin s aura","q":1,"b":"main","cmd":false},{"k":"rhystic study","q":1,"b":"main","cmd":false},{"k":"mystic remora","q":1,"b":"main","cmd":false},{"k":"sylvan library","q":1,"b":"main","cmd":false},{"k":"carpet of flowers","q":1,"b":"main","cmd":false},{"k":"utopia sprawl","q":1,"b":"main","cmd":false},{"k":"force of will","q":1,"b":"main","cmd":false},{"k":"force of negation","q":1,"b":"main","cmd":false},{"k":"pact of negation","q":1,"b":"main","cmd":false},{"k":"mana drain","q":1,"b":"main","cmd":false},{"k":"swan song","q":1,"b":"main","cmd":false},{"k":"flusterstorm","q":1,"b":"main","cmd":false},{"k":"mental misstep","q":1,"b":"main","cmd":false},{"k":"fierce guardianship","q":1,"b":"main","cmd":false},{"k":"an offer you can t refuse","q":1,"b":"main","cmd":false},{"k":"brainstorm","q":1,"b":"main","cmd":false},{"k":"worldly tutor","q":1,"b":"main","cmd":false},{"k":"mystical tutor","q":1,"b":"main","cmd":false},{"k":"crop rotation","q":1,"b":"main","cmd":false},{"k":"chain of vapor","q":1,"b":"main","cmd":false},{"k":"cyclonic rift","q":1,"b":"main","cmd":false},{"k":"veil of summer","q":1,"b":"main","cmd":false},{"k":"summoner s pact","q":1,"b":"main","cmd":false},{"k":"chord of calling","q":1,"b":"main","cmd":false},{"k":"green sun s zenith","q":1,"b":"main","cmd":false},{"k":"finale of devastation","q":1,"b":"main","cmd":false},{"k":"ponder","q":1,"b":"main","cmd":false},{"k":"gitaxian probe","q":1,"b":"main","cmd":false},{"k":"transmute artifact","q":1,"b":"main","cmd":false},{"k":"eldritch evolution","q":1,"b":"main","cmd":false},{"k":"neoform","q":1,"b":"main","cmd":false},{"k":"command tower","q":1,"b":"main","cmd":false},{"k":"tropical island","q":1,"b":"main","cmd":false},{"k":"breeding pool","q":1,"b":"main","cmd":false},{"k":"misty rainforest","q":1,"b":"main","cmd":false},{"k":"flooded strand","q":1,"b":"main","cmd":false},{"k":"polluted delta","q":1,"b":"main","cmd":false},{"k":"scalding tarn","q":1,"b":"main","cmd":false},{"k":"verdant catacombs","q":1,"b":"main","cmd":false},{"k":"windswept heath","q":1,"b":"main","cmd":false},{"k":"wooded foothills","q":1,"b":"main","cmd":false},{"k":"yavimaya coast","q":1,"b":"main","cmd":false},{"k":"waterlogged grove","q":1,"b":"main","cmd":false},{"k":"city of brass","q":1,"b":"main","cmd":false},{"k":"mana confluence","q":1,"b":"main","cmd":false},{"k":"forbidden orchard","q":1,"b":"main","cmd":false},{"k":"gemstone caverns","q":1,"b":"main","cmd":false},{"k":"ancient tomb","q":1,"b":"main","cmd":false},{"k":"gaea s cradle","q":1,"b":"main","cmd":false},{"k":"otawara soaring city","q":1,"b":"main","cmd":false},{"k":"boseiju who endures","q":1,"b":"main","cmd":false},{"k":"minamo school at water s edge","q":1,"b":"main","cmd":false},{"k":"urza s saga","q":1,"b":"main","cmd":false},{"k":"talon gates of madara","q":1,"b":"main","cmd":false},{"k":"cephalid coliseum","q":1,"b":"main","cmd":false},{"k":"snow covered forest","q":2,"b":"main","cmd":false},{"k":"snow covered island","q":2,"b":"main","cmd":false}],"missing":[],"cards":{"kinnan bonder prodigy":{"n":"Kinnan, Bonder Prodigy","full":"Kinnan, Bonder Prodigy","front":"Kinnan, Bonder Prodigy","t":"Legendary Creature — Human Druid","g":"creature","mv":2,"c":"{G}{U}","ci":"GU","img":"https://cards.scryfall.io/normal/front/6/3/63cda4a0-0dff-4edb-ae67-a2b7e2971350.jpg?1783931023","art":"https://cards.scryfall.io/art_crop/front/6/3/63cda4a0-0dff-4edb-ae67-a2b7e2971350.jpg?1783931023","artist":"Jason Rainville"},"birds of paradise":{"n":"Birds of Paradise","full":"Birds of Paradise","front":"Birds of Paradise","t":"Creature — Bird","g":"creature","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/4/9/492c2f9a-51e7-4e0f-9899-23bf43ea988b.jpg?1783903230","art":"https://cards.scryfall.io/art_crop/front/4/9/492c2f9a-51e7-4e0f-9899-23bf43ea988b.jpg?1783903230","artist":"Kevin Sidharta"},"llanowar elves":{"n":"Llanowar Elves","full":"Llanowar Elves","front":"Llanowar Elves","t":"Creature — Elf Druid","g":"creature","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/6/a/6a0b230b-d391-4998-a3f7-7b158a0ec2cd.jpg?1783909057","art":"https://cards.scryfall.io/art_crop/front/6/a/6a0b230b-d391-4998-a3f7-7b158a0ec2cd.jpg?1783909057","artist":"Kev Walker"},"elvish mystic":{"n":"Elvish Mystic","full":"Elvish Mystic","front":"Elvish Mystic","t":"Creature — Elf Druid","g":"creature","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/0/8/08b9a296-3b76-4f8f-9d71-7c9af92bb3b4.jpg?1785647413","art":"https://cards.scryfall.io/art_crop/front/0/8/08b9a296-3b76-4f8f-9d71-7c9af92bb3b4.jpg?1785647413","artist":"Iga Oliwiak"},"fyndhorn elves":{"n":"Fyndhorn Elves","full":"Fyndhorn Elves","front":"Fyndhorn Elves","t":"Creature — Elf Druid","g":"creature","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/4/5/450744cf-7eba-491b-97b0-ca80c6368bbb.jpg?1783928794","art":"https://cards.scryfall.io/art_crop/front/4/5/450744cf-7eba-491b-97b0-ca80c6368bbb.jpg?1783928794","artist":"Igor Kieryluk"},"arbor elf":{"n":"Arbor Elf","full":"Arbor Elf","front":"Arbor Elf","t":"Creature — Elf Druid","g":"creature","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/4/b/4b81165e-f091-4211-8b47-5ea6868b0d4c.jpg?1783935136","art":"https://cards.scryfall.io/art_crop/front/4/b/4b81165e-f091-4211-8b47-5ea6868b0d4c.jpg?1783935136","artist":"rk post"},"bloom tender":{"n":"Bloom Tender","full":"Bloom Tender","front":"Bloom Tender","t":"Creature — Elf Druid","g":"creature","mv":2,"c":"{1}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/b/a/ba86688d-18f0-4b5c-a797-42bf125a6c9f.jpg?1783904436","art":"https://cards.scryfall.io/art_crop/front/b/a/ba86688d-18f0-4b5c-a797-42bf125a6c9f.jpg?1783904436","artist":"Nils Hamm"},"priest of titania":{"n":"Priest of Titania","full":"Priest of Titania","front":"Priest of Titania","t":"Creature — Elf Druid","g":"creature","mv":2,"c":"{1}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/e/b/eb11921b-1b28-483f-a707-4de21a6daa31.jpg?1783911212","art":"https://cards.scryfall.io/art_crop/front/e/b/eb11921b-1b28-483f-a707-4de21a6daa31.jpg?1783911212","artist":"Rebecca Guay"},"elvish spirit guide":{"n":"Elvish Spirit Guide","full":"Elvish Spirit Guide","front":"Elvish Spirit Guide","t":"Creature — Elf Spirit","g":"creature","mv":3,"c":"{2}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/5/0/50aded92-f934-441f-8e48-d68d471e70d8.jpg?1783918445","art":"https://cards.scryfall.io/art_crop/front/5/0/50aded92-f934-441f-8e48-d68d471e70d8.jpg?1783918445","artist":"Anna Steinbauer"},"incubation druid":{"n":"Incubation Druid","full":"Incubation Druid","front":"Incubation Druid","t":"Creature — Elf Druid","g":"creature","mv":2,"c":"{1}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/b/3/b3d8c95e-09b9-46d6-80e9-95adb2c2ea9d.jpg?1783917139","art":"https://cards.scryfall.io/art_crop/front/b/3/b3d8c95e-09b9-46d6-80e9-95adb2c2ea9d.jpg?1783917139","artist":"Daniel Ljunggren"},"gilded goose":{"n":"Gilded Goose","full":"Gilded Goose","front":"Gilded Goose","t":"Creature — Bird","g":"creature","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/5/e/5ea59511-24b1-4925-9948-9d4c0d27d1c5.jpg?1783903766","art":"https://cards.scryfall.io/art_crop/front/5/e/5ea59511-24b1-4925-9948-9d4c0d27d1c5.jpg?1783903766","artist":"Lindsey Look"},"delighted halfling":{"n":"Delighted Halfling","full":"Delighted Halfling","front":"Delighted Halfling","t":"Creature — Halfling Citizen","g":"creature","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/7/1/71384418-173a-4f77-adab-56e52fa23692.jpg?1783916276","art":"https://cards.scryfall.io/art_crop/front/7/1/71384418-173a-4f77-adab-56e52fa23692.jpg?1783916276","artist":"Inka Schulz"},"faerie mastermind":{"n":"Faerie Mastermind","full":"Faerie Mastermind","front":"Faerie Mastermind","t":"Creature — Faerie Rogue","g":"creature","mv":2,"c":"{1}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/b/c/bc9a7599-3c7d-4b83-bff3-e3d1f20f1b0f.jpg?1783903820","art":"https://cards.scryfall.io/art_crop/front/b/c/bc9a7599-3c7d-4b83-bff3-e3d1f20f1b0f.jpg?1783903820","artist":"Kai Carpenter"},"thrasios triton hero":{"n":"Thrasios, Triton Hero","full":"Thrasios, Triton Hero","front":"Thrasios, Triton Hero","t":"Legendary Creature — Merfolk Wizard","g":"creature","mv":2,"c":"{G}{U}","ci":"GU","img":"https://cards.scryfall.io/normal/front/2/1/21e27b91-c7f1-4709-aa0d-8b5d81b22a0a.jpg?1783937081","art":"https://cards.scryfall.io/art_crop/front/2/1/21e27b91-c7f1-4709-aa0d-8b5d81b22a0a.jpg?1783937081","artist":"Josu Hernaiz"},"seedborn muse":{"n":"Seedborn Muse","full":"Seedborn Muse","front":"Seedborn Muse","t":"Creature — Spirit","g":"creature","mv":5,"c":"{3}{G}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/7/6/76f58441-5674-4f1e-af9b-94e14ab7e619.jpg?1783907041","art":"https://cards.scryfall.io/art_crop/front/7/6/76f58441-5674-4f1e-af9b-94e14ab7e619.jpg?1783907041","artist":"Adam Rex"},"hullbreaker horror":{"n":"Hullbreaker Horror","full":"Hullbreaker Horror","front":"Hullbreaker Horror","t":"Creature — Kraken Horror","g":"creature","mv":7,"c":"{5}{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/1/3/137acb70-a1fd-4ea9-a5d9-f4b438eb5e82.jpg?1783908162","art":"https://cards.scryfall.io/art_crop/front/1/3/137acb70-a1fd-4ea9-a5d9-f4b438eb5e82.jpg?1783908162","artist":"Svetlin Velinov"},"thassa s oracle":{"n":"Thassa's Oracle","full":"Thassa's Oracle","front":"Thassa's Oracle","t":"Creature — Merfolk Wizard","g":"creature","mv":2,"c":"{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/7/2/726e8b29-13e9-4138-b6a9-d2a0d8188d1c.jpg?1783931575","art":"https://cards.scryfall.io/art_crop/front/7/2/726e8b29-13e9-4138-b6a9-d2a0d8188d1c.jpg?1783931575","artist":"Jesper Ejsing"},"walking ballista":{"n":"Walking Ballista","full":"Walking Ballista","front":"Walking Ballista","t":"Artifact Creature — Construct","g":"creature","mv":0,"c":"{X}{X}","ci":"","img":"https://cards.scryfall.io/normal/front/5/2/5272436e-74f0-44c4-a291-ea8ebc3f1525.jpg?1783930088","art":"https://cards.scryfall.io/art_crop/front/5/2/5272436e-74f0-44c4-a291-ea8ebc3f1525.jpg?1783930088","artist":"Daniel Ljunggren"},"spellseeker":{"n":"Spellseeker","full":"Spellseeker","front":"Spellseeker","t":"Creature — Human Wizard","g":"creature","mv":3,"c":"{2}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/a/7/a749c591-2fbe-41d8-ac5b-56ebce82d33e.jpg?1783915690","art":"https://cards.scryfall.io/art_crop/front/a/7/a749c591-2fbe-41d8-ac5b-56ebce82d33e.jpg?1783915690","artist":"Igor Kieryluk"},"phantasmal image":{"n":"Phantasmal Image","full":"Phantasmal Image","front":"Phantasmal Image","t":"Creature — Illusion","g":"creature","mv":2,"c":"{1}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/c/1/c1c080cf-a5e8-4d9d-af49-f78588971e87.jpg?1783926223","art":"https://cards.scryfall.io/art_crop/front/c/1/c1c080cf-a5e8-4d9d-af49-f78588971e87.jpg?1783926223","artist":"Nils Hamm"},"dryad arbor":{"n":"Dryad Arbor","full":"Dryad Arbor","front":"Dryad Arbor","t":"Land Creature — Forest Dryad","g":"land","mv":0,"c":"","ci":"G","img":"https://cards.scryfall.io/normal/front/e/3/e3ddbebf-72cd-4d1b-ba0d-d94934654ab7.jpg?1783909577","art":"https://cards.scryfall.io/art_crop/front/e/3/e3ddbebf-72cd-4d1b-ba0d-d94934654ab7.jpg?1783909577","artist":"Eric Fortune"},"displacer kitten":{"n":"Displacer Kitten","full":"Displacer Kitten","front":"Displacer Kitten","t":"Creature — Cat Beast","g":"creature","mv":4,"c":"{3}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/c/7/c7a401b8-29fb-46ef-a663-427f66724d5c.jpg?1783922795","art":"https://cards.scryfall.io/art_crop/front/c/7/c7a401b8-29fb-46ef-a663-427f66724d5c.jpg?1783922795","artist":"Campbell White"},"brazen borrower":{"n":"Brazen Borrower","full":"Brazen Borrower // Petty Theft","front":"Brazen Borrower","t":"Creature — Faerie Rogue","g":"creature","mv":3,"c":"{1}{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/2/5/25d309d6-9e56-441e-bd29-5c903d5221bf.jpg?1783903792","art":"https://cards.scryfall.io/art_crop/front/2/5/25d309d6-9e56-441e-bd29-5c903d5221bf.jpg?1783903792","artist":"Eric Deschamps"},"oko thief of crowns":{"n":"Oko, Thief of Crowns","full":"Oko, Thief of Crowns","front":"Oko, Thief of Crowns","t":"Legendary Planeswalker — Oko","g":"planeswalker","mv":3,"c":"{1}{G}{U}","ci":"GU","img":"https://cards.scryfall.io/normal/front/3/4/3462a3d0-5552-49fa-9eb7-100960c55891.jpg?1791803810","art":"https://cards.scryfall.io/art_crop/front/3/4/3462a3d0-5552-49fa-9eb7-100960c55891.jpg?1791803810","artist":"Yongjae Choi"},"invasion of ikoria":{"n":"Invasion of Ikoria","full":"Invasion of Ikoria // Zilortha, Apex of Ikoria","front":"Invasion of Ikoria","t":"Battle — Siege","g":"battle","mv":2,"c":"{X}{G}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/5/d/5d59c8f2-f6af-40a6-8dfe-8cc45bf231ce.jpg?1783916974","art":"https://cards.scryfall.io/art_crop/front/5/d/5d59c8f2-f6af-40a6-8dfe-8cc45bf231ce.jpg?1783916974","artist":"Antonio José Manzanedo"},"sol ring":{"n":"Sol Ring","full":"Sol Ring","front":"Sol Ring","t":"Artifact","g":"artifact","mv":1,"c":"{1}","ci":"","img":"https://cards.scryfall.io/normal/front/f/c/fc817e07-c1f3-469f-9cf7-0945dea7400f.jpg?1793021181","art":"https://cards.scryfall.io/art_crop/front/f/c/fc817e07-c1f3-469f-9cf7-0945dea7400f.jpg?1793021181","artist":"Hector Ortiz"},"mana vault":{"n":"Mana Vault","full":"Mana Vault","front":"Mana Vault","t":"Artifact","g":"artifact","mv":1,"c":"{1}","ci":"","img":"https://cards.scryfall.io/normal/front/c/1/c1a31d52-a407-4ded-bfca-cc812f11afa0.jpg?1783921790","art":"https://cards.scryfall.io/art_crop/front/c/1/c1a31d52-a407-4ded-bfca-cc812f11afa0.jpg?1783921790","artist":"Christine Choi"},"grim monolith":{"n":"Grim Monolith","full":"Grim Monolith","front":"Grim Monolith","t":"Artifact","g":"artifact","mv":2,"c":"{2}","ci":"","img":"https://cards.scryfall.io/normal/front/9/d/9ddc9fe1-17c8-4e1d-aeb8-c4214e881280.jpg?1783946223","art":"https://cards.scryfall.io/art_crop/front/9/d/9ddc9fe1-17c8-4e1d-aeb8-c4214e881280.jpg?1783946223","artist":"Chippy"},"basalt monolith":{"n":"Basalt Monolith","full":"Basalt Monolith","front":"Basalt Monolith","t":"Artifact","g":"artifact","mv":3,"c":"{3}","ci":"","img":"https://cards.scryfall.io/normal/front/f/7/f79de5e7-1545-420c-bfe1-ee2444fca85b.jpg?1783930120","art":"https://cards.scryfall.io/art_crop/front/f/7/f79de5e7-1545-420c-bfe1-ee2444fca85b.jpg?1783930120","artist":"Yeong-Hao Han"},"chrome mox":{"n":"Chrome Mox","full":"Chrome Mox","front":"Chrome Mox","t":"Artifact","g":"artifact","mv":0,"c":"{0}","ci":"","img":"https://cards.scryfall.io/normal/front/f/3/f340cbf7-5bbe-45b9-a4bf-d1caa500ff93.jpg?1783930116","art":"https://cards.scryfall.io/art_crop/front/f/3/f340cbf7-5bbe-45b9-a4bf-d1caa500ff93.jpg?1783930116","artist":"Volkan Baǵa"},"mox diamond":{"n":"Mox Diamond","full":"Mox Diamond","front":"Mox Diamond","t":"Artifact","g":"artifact","mv":0,"c":"{0}","ci":"","img":"https://cards.scryfall.io/normal/front/b/f/bf9fecfd-d122-422f-bd0a-5bf69b434dfe.jpg?1783938445","art":"https://cards.scryfall.io/art_crop/front/b/f/bf9fecfd-d122-422f-bd0a-5bf69b434dfe.jpg?1783938445","artist":"Dan Frazier"},"mox opal":{"n":"Mox Opal","full":"Mox Opal","front":"Mox Opal","t":"Legendary Artifact","g":"artifact","mv":0,"c":"{0}","ci":"","img":"https://cards.scryfall.io/normal/front/5/6/56001a36-126b-4c08-af98-a6cc4d84210e.jpg?1783930101","art":"https://cards.scryfall.io/art_crop/front/5/6/56001a36-126b-4c08-af98-a6cc4d84210e.jpg?1783930101","artist":"Volkan Baǵa"},"mox amber":{"n":"Mox Amber","full":"Mox Amber","front":"Mox Amber","t":"Legendary Artifact","g":"artifact","mv":0,"c":"{0}","ci":"","img":"https://cards.scryfall.io/normal/front/6/6/66024e69-ad60-4c9a-a0ca-da138d33ad80.jpg?1783934955","art":"https://cards.scryfall.io/art_crop/front/6/6/66024e69-ad60-4c9a-a0ca-da138d33ad80.jpg?1783934955","artist":"Steven Belledin"},"lotus petal":{"n":"Lotus Petal","full":"Lotus Petal","front":"Lotus Petal","t":"Artifact","g":"artifact","mv":0,"c":"{0}","ci":"","img":"https://cards.scryfall.io/normal/front/f/8/f85ab5f9-508e-45de-8fa1-ce1f16552ffc.jpg?1783938446","art":"https://cards.scryfall.io/art_crop/front/f/8/f85ab5f9-508e-45de-8fa1-ce1f16552ffc.jpg?1783938446","artist":"April Lee"},"lion s eye diamond":{"n":"Lion's Eye Diamond","full":"Lion's Eye Diamond","front":"Lion's Eye Diamond","t":"Artifact","g":"artifact","mv":0,"c":"{0}","ci":"","img":"https://cards.scryfall.io/normal/front/7/5/758f95f8-bcb0-43ae-b474-56ebd855951e.jpg?1783939234","art":"https://cards.scryfall.io/art_crop/front/7/5/758f95f8-bcb0-43ae-b474-56ebd855951e.jpg?1783939234","artist":"Lindsey Look"},"arcane signet":{"n":"Arcane Signet","full":"Arcane Signet","front":"Arcane Signet","t":"Artifact","g":"artifact","mv":2,"c":"{2}","ci":"","img":"https://cards.scryfall.io/normal/front/7/9/795df2ee-fbfc-4961-852c-e3ec50cc52da.jpg?1793021117","art":"https://cards.scryfall.io/art_crop/front/7/9/795df2ee-fbfc-4961-852c-e3ec50cc52da.jpg?1793021117","artist":"Tomáš Honz"},"talisman of curiosity":{"n":"Talisman of Curiosity","full":"Talisman of Curiosity","front":"Talisman of Curiosity","t":"Artifact","g":"artifact","mv":2,"c":"{2}","ci":"GU","img":"https://cards.scryfall.io/normal/front/8/3/8388c4e8-bda1-47e5-8df2-ddec5babcaf9.jpg?1783912967","art":"https://cards.scryfall.io/art_crop/front/8/3/8388c4e8-bda1-47e5-8df2-ddec5babcaf9.jpg?1783912967","artist":"Lindsey Look"},"springleaf drum":{"n":"Springleaf Drum","full":"Springleaf Drum","front":"Springleaf Drum","t":"Artifact","g":"artifact","mv":1,"c":"{1}","ci":"","img":"https://cards.scryfall.io/normal/front/e/1/e15ab0aa-4059-4923-9816-6f7a9e5b5a18.jpg?1783904399","art":"https://cards.scryfall.io/art_crop/front/e/1/e15ab0aa-4059-4923-9816-6f7a9e5b5a18.jpg?1783904399","artist":"Cory Godbey"},"umbral mantle":{"n":"Umbral Mantle","full":"Umbral Mantle","front":"Umbral Mantle","t":"Artifact — Equipment","g":"artifact","mv":3,"c":"{3}","ci":"","img":"https://cards.scryfall.io/normal/front/1/0/10e35711-aec9-4024-a2a6-9efff8c71df2.jpg?1783942708","art":"https://cards.scryfall.io/art_crop/front/1/0/10e35711-aec9-4024-a2a6-9efff8c71df2.jpg?1783942708","artist":"Richard Sardinha"},"the one ring":{"n":"The One Ring","full":"The One Ring","front":"The One Ring","t":"Legendary Artifact","g":"artifact","mv":4,"c":"{4}","ci":"","img":"https://cards.scryfall.io/normal/front/d/5/d5806e68-1054-458e-866d-1f2470f682b2.jpg?1790212038","art":"https://cards.scryfall.io/art_crop/front/d/5/d5806e68-1054-458e-866d-1f2470f682b2.jpg?1790212038","artist":"Veli Nyström"},"freed from the real":{"n":"Freed from the Real","full":"Freed from the Real","front":"Freed from the Real","t":"Enchantment — Aura","g":"enchantment","mv":3,"c":"{2}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/c/4/c47ee6f6-50c1-4f56-b9ce-4c309bfb92ca.jpg?1783935178","art":"https://cards.scryfall.io/art_crop/front/c/4/c47ee6f6-50c1-4f56-b9ce-4c309bfb92ca.jpg?1783935178","artist":"Scott M. Fischer"},"pemmin s aura":{"n":"Pemmin's Aura","full":"Pemmin's Aura","front":"Pemmin's Aura","t":"Enchantment — Aura","g":"enchantment","mv":3,"c":"{1}{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/9/f/9fb3e38b-086e-4fbc-b7b1-8564c18276d7.jpg?1783944885","art":"https://cards.scryfall.io/art_crop/front/9/f/9fb3e38b-086e-4fbc-b7b1-8564c18276d7.jpg?1783944885","artist":"Greg Staples"},"rhystic study":{"n":"Rhystic Study","full":"Rhystic Study","front":"Rhystic Study","t":"Enchantment","g":"enchantment","mv":3,"c":"{2}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/9/f/9f37c5b6-a59c-45cd-9a99-e9357fe9ea1b.jpg?1783919146","art":"https://cards.scryfall.io/art_crop/front/9/f/9f37c5b6-a59c-45cd-9a99-e9357fe9ea1b.jpg?1783919146","artist":"Tatiana Kirgetova"},"mystic remora":{"n":"Mystic Remora","full":"Mystic Remora","front":"Mystic Remora","t":"Enchantment","g":"enchantment","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/4/0/40140991-cffa-4b52-9a25-37e9a8aa9ddd.jpg?1783918491","art":"https://cards.scryfall.io/art_crop/front/4/0/40140991-cffa-4b52-9a25-37e9a8aa9ddd.jpg?1783918491","artist":"Jesper Ejsing"},"sylvan library":{"n":"Sylvan Library","full":"Sylvan Library","front":"Sylvan Library","t":"Enchantment","g":"enchantment","mv":2,"c":"{1}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/6/a/6ada256f-2e55-4c1f-b4d3-d7b10b498956.jpg?1783918436","art":"https://cards.scryfall.io/art_crop/front/6/a/6ada256f-2e55-4c1f-b4d3-d7b10b498956.jpg?1783918436","artist":"Yeong-Hao Han"},"carpet of flowers":{"n":"Carpet of Flowers","full":"Carpet of Flowers","front":"Carpet of Flowers","t":"Enchantment","g":"enchantment","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/9/3/93abb48a-85f2-432d-8602-0a1d17fbb409.jpg?1783946318","art":"https://cards.scryfall.io/art_crop/front/9/3/93abb48a-85f2-432d-8602-0a1d17fbb409.jpg?1783946318","artist":"Rebecca Guay"},"utopia sprawl":{"n":"Utopia Sprawl","full":"Utopia Sprawl","front":"Utopia Sprawl","t":"Enchantment — Aura","g":"enchantment","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/5/e/5ea568df-04a1-4012-98ec-ba75e189e0ca.jpg?1783913297","art":"https://cards.scryfall.io/art_crop/front/5/e/5ea568df-04a1-4012-98ec-ba75e189e0ca.jpg?1783913297","artist":"Ron Spears"},"force of will":{"n":"Force of Will","full":"Force of Will","front":"Force of Will","t":"Instant","g":"instant","mv":5,"c":"{3}{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/8/9/89f612d6-7c59-4a7b-a87d-45f789e88ba5.jpg?1789015964","art":"https://cards.scryfall.io/art_crop/front/8/9/89f612d6-7c59-4a7b-a87d-45f789e88ba5.jpg?1789015964","artist":"Donato Giancola"},"force of negation":{"n":"Force of Negation","full":"Force of Negation","front":"Force of Negation","t":"Instant","g":"instant","mv":3,"c":"{1}{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1783921916","art":"https://cards.scryfall.io/art_crop/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1783921916","artist":"Paul Scott Canavan"},"pact of negation":{"n":"Pact of Negation","full":"Pact of Negation","front":"Pact of Negation","t":"Instant","g":"instant","mv":0,"c":"{0}","ci":"U","img":"https://cards.scryfall.io/normal/front/1/e/1ed4c0bb-b710-44a1-b8bc-6bd11c27b8b8.jpg?1783927843","art":"https://cards.scryfall.io/art_crop/front/1/e/1ed4c0bb-b710-44a1-b8bc-6bd11c27b8b8.jpg?1783927843","artist":"Jason Chan"},"mana drain":{"n":"Mana Drain","full":"Mana Drain","front":"Mana Drain","t":"Instant","g":"instant","mv":2,"c":"{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/3/c/3c429c40-2389-41e5-8681-4bb274e25eba.jpg?1783921913","art":"https://cards.scryfall.io/art_crop/front/3/c/3c429c40-2389-41e5-8681-4bb274e25eba.jpg?1783921913","artist":"Raymond Swanland"},"swan song":{"n":"Swan Song","full":"Swan Song","front":"Swan Song","t":"Instant","g":"instant","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/8/3/83d0b761-d694-4232-9f40-5bd8c82a05f1.jpg?1783906053","art":"https://cards.scryfall.io/art_crop/front/8/3/83d0b761-d694-4232-9f40-5bd8c82a05f1.jpg?1783906053","artist":"Lorenzo Mastroianni"},"flusterstorm":{"n":"Flusterstorm","full":"Flusterstorm","front":"Flusterstorm","t":"Instant","g":"instant","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/f/9/f900eeb7-7c45-44bc-ad3a-0bbe594ecf50.jpg?1783935548","art":"https://cards.scryfall.io/art_crop/front/f/9/f900eeb7-7c45-44bc-ad3a-0bbe594ecf50.jpg?1783935548","artist":"Erica Yang"},"mental misstep":{"n":"Mental Misstep","full":"Mental Misstep","front":"Mental Misstep","t":"Instant","g":"instant","mv":1,"c":"{U/P}","ci":"U","img":"https://cards.scryfall.io/normal/front/6/1/61e9c6df-1c84-4eab-9076-a4feb6347c10.jpg?1783941319","art":"https://cards.scryfall.io/art_crop/front/6/1/61e9c6df-1c84-4eab-9076-a4feb6347c10.jpg?1783941319","artist":"Erica Yang"},"fierce guardianship":{"n":"Fierce Guardianship","full":"Fierce Guardianship","front":"Fierce Guardianship","t":"Instant","g":"instant","mv":3,"c":"{2}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/f/7/f7f3dd95-bd14-4e0f-a388-444f9cf1b0dc.jpg?1783915698","art":"https://cards.scryfall.io/art_crop/front/f/7/f7f3dd95-bd14-4e0f-a388-444f9cf1b0dc.jpg?1783915698","artist":"Randy Vargas"},"an offer you can t refuse":{"n":"An Offer You Can't Refuse","full":"An Offer You Can't Refuse","front":"An Offer You Can't Refuse","t":"Instant","g":"instant","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/a/8/a829747f-cf9b-4d81-ba66-9f0630ed4565.jpg?1783909078","art":"https://cards.scryfall.io/art_crop/front/a/8/a829747f-cf9b-4d81-ba66-9f0630ed4565.jpg?1783909078","artist":"Dallas Williams"},"brainstorm":{"n":"Brainstorm","full":"Brainstorm","front":"Brainstorm","t":"Instant","g":"instant","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/1/e/1ede3080-8c47-48a0-b757-92c3fa91fac0.jpg?1793281332","art":"https://cards.scryfall.io/art_crop/front/1/e/1ede3080-8c47-48a0-b757-92c3fa91fac0.jpg?1793281332","artist":"Andreas Zafiratos"},"worldly tutor":{"n":"Worldly Tutor","full":"Worldly Tutor","front":"Worldly Tutor","t":"Instant","g":"instant","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/f/3/f39aa2e9-e294-4ce6-bf5e-e1f579101a7a.jpg?1783918434","art":"https://cards.scryfall.io/art_crop/front/f/3/f39aa2e9-e294-4ce6-bf5e-e1f579101a7a.jpg?1783918434","artist":"Volkan Baǵa"},"mystical tutor":{"n":"Mystical Tutor","full":"Mystical Tutor","front":"Mystical Tutor","t":"Instant","g":"instant","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/3/6/36fa9a0b-b0c9-43ea-ba11-99d7982f974e.jpg?1783918491","art":"https://cards.scryfall.io/art_crop/front/3/6/36fa9a0b-b0c9-43ea-ba11-99d7982f974e.jpg?1783918491","artist":"Lindsey Look"},"crop rotation":{"n":"Crop Rotation","full":"Crop Rotation","front":"Crop Rotation","t":"Instant","g":"instant","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/5/2/523414cb-f8db-407a-808a-01454e03d8b9.jpg?1783918448","art":"https://cards.scryfall.io/art_crop/front/5/2/523414cb-f8db-407a-808a-01454e03d8b9.jpg?1783918448","artist":"DiTerlizzi"},"chain of vapor":{"n":"Chain of Vapor","full":"Chain of Vapor","front":"Chain of Vapor","t":"Instant","g":"instant","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/3/8/38f741bf-13ee-4384-98ab-27833ebb9f6d.jpg?1783937074","art":"https://cards.scryfall.io/art_crop/front/3/8/38f741bf-13ee-4384-98ab-27833ebb9f6d.jpg?1783937074","artist":"Svetlin Velinov"},"cyclonic rift":{"n":"Cyclonic Rift","full":"Cyclonic Rift","front":"Cyclonic Rift","t":"Instant","g":"instant","mv":2,"c":"{1}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/d/f/dfb7c4b9-f2f4-4d4e-baf2-86551c8150fe.jpg?1783913339","art":"https://cards.scryfall.io/art_crop/front/d/f/dfb7c4b9-f2f4-4d4e-baf2-86551c8150fe.jpg?1783913339","artist":"Isis"},"veil of summer":{"n":"Veil of Summer","full":"Veil of Summer","front":"Veil of Summer","t":"Instant","g":"instant","mv":1,"c":"{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/a/a/aa686c34-1c11-469f-93c2-f9891aea521f.jpg?1783932955","art":"https://cards.scryfall.io/art_crop/front/a/a/aa686c34-1c11-469f-93c2-f9891aea521f.jpg?1783932955","artist":"Lake Hurwitz"},"summoner s pact":{"n":"Summoner's Pact","full":"Summoner's Pact","front":"Summoner's Pact","t":"Instant","g":"instant","mv":0,"c":"{0}","ci":"G","img":"https://cards.scryfall.io/normal/front/e/e/ee0f88ac-8a90-4057-b0e6-c15fbd02da38.jpg?1783927768","art":"https://cards.scryfall.io/art_crop/front/e/e/ee0f88ac-8a90-4057-b0e6-c15fbd02da38.jpg?1783927768","artist":"Chippy"},"chord of calling":{"n":"Chord of Calling","full":"Chord of Calling","front":"Chord of Calling","t":"Instant","g":"instant","mv":3,"c":"{X}{G}{G}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/b/1/b18fe7e0-8344-40cc-b242-83f01c6be7a6.jpg?1783913306","art":"https://cards.scryfall.io/art_crop/front/b/1/b18fe7e0-8344-40cc-b242-83f01c6be7a6.jpg?1783913306","artist":"Heather Hudson"},"green sun s zenith":{"n":"Green Sun's Zenith","full":"Green Sun's Zenith","front":"Green Sun's Zenith","t":"Sorcery","g":"sorcery","mv":1,"c":"{X}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/7/0/70291c7b-a86f-4466-8502-c28765a89b2a.jpg?1783921868","art":"https://cards.scryfall.io/art_crop/front/7/0/70291c7b-a86f-4466-8502-c28765a89b2a.jpg?1783921868","artist":"David Rapoza"},"finale of devastation":{"n":"Finale of Devastation","full":"Finale of Devastation","front":"Finale of Devastation","t":"Sorcery","g":"sorcery","mv":2,"c":"{X}{G}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/b/1/b10d99bf-b2ce-4443-b924-ff0eb8be1033.jpg?1783915632","art":"https://cards.scryfall.io/art_crop/front/b/1/b10d99bf-b2ce-4443-b924-ff0eb8be1033.jpg?1783915632","artist":"Bayard Wu"},"ponder":{"n":"Ponder","full":"Ponder","front":"Ponder","t":"Sorcery","g":"sorcery","mv":1,"c":"{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/0/c/0cb673af-dae0-478c-a5d3-b697338f6c0e.jpg?1793281344","art":"https://cards.scryfall.io/art_crop/front/0/c/0cb673af-dae0-478c-a5d3-b697338f6c0e.jpg?1793281344","artist":"Berto Martinez"},"gitaxian probe":{"n":"Gitaxian Probe","full":"Gitaxian Probe","front":"Gitaxian Probe","t":"Sorcery","g":"sorcery","mv":1,"c":"{U/P}","ci":"U","img":"https://cards.scryfall.io/normal/front/9/9/995486ce-58bb-4753-a812-0ca73ef1a235.jpg?1783941320","art":"https://cards.scryfall.io/art_crop/front/9/9/995486ce-58bb-4753-a812-0ca73ef1a235.jpg?1783941320","artist":"Chippy"},"transmute artifact":{"n":"Transmute Artifact","full":"Transmute Artifact","front":"Transmute Artifact","t":"Sorcery","g":"sorcery","mv":2,"c":"{U}{U}","ci":"U","img":"https://cards.scryfall.io/normal/front/2/8/2888553d-5ed0-4e47-8cc2-1491b5557c53.jpg?1783941448","art":"https://cards.scryfall.io/art_crop/front/2/8/2888553d-5ed0-4e47-8cc2-1491b5557c53.jpg?1783941448","artist":"Anson Maddocks"},"eldritch evolution":{"n":"Eldritch Evolution","full":"Eldritch Evolution","front":"Eldritch Evolution","t":"Sorcery","g":"sorcery","mv":3,"c":"{1}{G}{G}","ci":"G","img":"https://cards.scryfall.io/normal/front/6/0/606caf13-c0d3-4a61-9a1a-32f13b6448ab.jpg?1783908101","art":"https://cards.scryfall.io/art_crop/front/6/0/606caf13-c0d3-4a61-9a1a-32f13b6448ab.jpg?1783908101","artist":"Jason Rainville"},"neoform":{"n":"Neoform","full":"Neoform","front":"Neoform","t":"Sorcery","g":"sorcery","mv":2,"c":"{G}{U}","ci":"GU","img":"https://cards.scryfall.io/normal/front/9/2/92d8f67e-4f2f-4a1f-b190-7c3f39e477e4.jpg?1783933392","art":"https://cards.scryfall.io/art_crop/front/9/2/92d8f67e-4f2f-4a1f-b190-7c3f39e477e4.jpg?1783933392","artist":"Bram Sels"},"command tower":{"n":"Command Tower","full":"Command Tower","front":"Command Tower","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/a/7/a73297d2-580c-4174-a427-265f6916d09f.jpg?1793021256","art":"https://cards.scryfall.io/art_crop/front/a/7/a73297d2-580c-4174-a427-265f6916d09f.jpg?1793021256","artist":"Arthur Yuan"},"tropical island":{"n":"Tropical Island","full":"Tropical Island","front":"Tropical Island","t":"Land — Forest Island","g":"land","mv":0,"c":"","ci":"GU","img":"https://cards.scryfall.io/normal/front/4/7/47033ba4-8f26-4a6b-97bd-5b366327325e.jpg?1783939216","art":"https://cards.scryfall.io/art_crop/front/4/7/47033ba4-8f26-4a6b-97bd-5b366327325e.jpg?1783939216","artist":"Franz Vohwinkel"},"breeding pool":{"n":"Breeding Pool","full":"Breeding Pool","front":"Breeding Pool","t":"Land — Forest Island","g":"land","mv":0,"c":"","ci":"GU","img":"https://cards.scryfall.io/normal/front/6/3/63e4dc07-c742-41bd-8301-861637908fd1.jpg?1784036820","art":"https://cards.scryfall.io/art_crop/front/6/3/63e4dc07-c742-41bd-8301-861637908fd1.jpg?1784036820","artist":"Cliff Nielsen"},"misty rainforest":{"n":"Misty Rainforest","full":"Misty Rainforest","front":"Misty Rainforest","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1783926795","art":"https://cards.scryfall.io/art_crop/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1783926795","artist":"Shelly Wan"},"flooded strand":{"n":"Flooded Strand","full":"Flooded Strand","front":"Flooded Strand","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1783911240","art":"https://cards.scryfall.io/art_crop/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1783911240","artist":"Alexander Forssberg"},"polluted delta":{"n":"Polluted Delta","full":"Polluted Delta","front":"Polluted Delta","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1783911240","art":"https://cards.scryfall.io/art_crop/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1783911240","artist":"Chris Ostrowski"},"scalding tarn":{"n":"Scalding Tarn","full":"Scalding Tarn","front":"Scalding Tarn","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1783926793","art":"https://cards.scryfall.io/art_crop/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1783926793","artist":"Philip Straub"},"verdant catacombs":{"n":"Verdant Catacombs","full":"Verdant Catacombs","front":"Verdant Catacombs","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/9/4/94c229ea-90da-4aa0-bfda-b162fb3b5b8b.jpg?1783926791","art":"https://cards.scryfall.io/art_crop/front/9/4/94c229ea-90da-4aa0-bfda-b162fb3b5b8b.jpg?1783926791","artist":"Vance Kovacs"},"windswept heath":{"n":"Windswept Heath","full":"Windswept Heath","front":"Windswept Heath","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/b/d/bd1d13f7-fd38-4f0b-a8e0-1eac78668117.jpg?1783911233","art":"https://cards.scryfall.io/art_crop/front/b/d/bd1d13f7-fd38-4f0b-a8e0-1eac78668117.jpg?1783911233","artist":"Alexander Forssberg"},"wooded foothills":{"n":"Wooded Foothills","full":"Wooded Foothills","front":"Wooded Foothills","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/4/e/4e11ea8a-f895-438d-a3b7-f070238e4161.jpg?1783911232","art":"https://cards.scryfall.io/art_crop/front/4/e/4e11ea8a-f895-438d-a3b7-f070238e4161.jpg?1783911232","artist":"Chris Ostrowski"},"yavimaya coast":{"n":"Yavimaya Coast","full":"Yavimaya Coast","front":"Yavimaya Coast","t":"Land","g":"land","mv":0,"c":"","ci":"GU","img":"https://cards.scryfall.io/normal/front/f/4/f4c1500b-1f4c-4d33-810c-25e3bb0a4666.jpg?1783903712","art":"https://cards.scryfall.io/art_crop/front/f/4/f4c1500b-1f4c-4d33-810c-25e3bb0a4666.jpg?1783903712","artist":"Jesper Ejsing"},"waterlogged grove":{"n":"Waterlogged Grove","full":"Waterlogged Grove","front":"Waterlogged Grove","t":"Land","g":"land","mv":0,"c":"","ci":"GU","img":"https://cards.scryfall.io/normal/front/0/a/0ab6bfbd-d2e1-4c4c-9f91-6f69c5b8e3bb.jpg?1783933063","art":"https://cards.scryfall.io/art_crop/front/0/a/0ab6bfbd-d2e1-4c4c-9f91-6f69c5b8e3bb.jpg?1783933063","artist":"John Avon"},"city of brass":{"n":"City of Brass","full":"City of Brass","front":"City of Brass","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/c/2/c21565d0-fc40-4d89-9b27-87c03385e0af.jpg?1783904153","art":"https://cards.scryfall.io/art_crop/front/c/2/c21565d0-fc40-4d89-9b27-87c03385e0af.jpg?1783904153","artist":"Robin Olausson"},"mana confluence":{"n":"Mana Confluence","full":"Mana Confluence","front":"Mana Confluence","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/5/0/504a69eb-3c2d-4bb1-b117-252b15acf0c2.jpg?1783939402","art":"https://cards.scryfall.io/art_crop/front/5/0/504a69eb-3c2d-4bb1-b117-252b15acf0c2.jpg?1783939402","artist":"Richard Wright"},"forbidden orchard":{"n":"Forbidden Orchard","full":"Forbidden Orchard","front":"Forbidden Orchard","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/1/7/17db644c-1acf-477d-9c20-f72221f1108a.jpg?1783921785","art":"https://cards.scryfall.io/art_crop/front/1/7/17db644c-1acf-477d-9c20-f72221f1108a.jpg?1783921785","artist":"Daniel Ljunggren"},"gemstone caverns":{"n":"Gemstone Caverns","full":"Gemstone Caverns","front":"Gemstone Caverns","t":"Legendary Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/7/f/7f273641-c5f3-48bc-b89e-3cff52d26a0b.jpg?1783927750","art":"https://cards.scryfall.io/art_crop/front/7/f/7f273641-c5f3-48bc-b89e-3cff52d26a0b.jpg?1783927750","artist":"Martina Pilcerova"},"ancient tomb":{"n":"Ancient Tomb","full":"Ancient Tomb","front":"Ancient Tomb","t":"Land","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/b/d/bd3d4b4b-cf31-4f89-8140-9650edb03c7b.jpg?1783933762","art":"https://cards.scryfall.io/art_crop/front/b/d/bd3d4b4b-cf31-4f89-8140-9650edb03c7b.jpg?1783933762","artist":"Yeong-Hao Han"},"gaea s cradle":{"n":"Gaea's Cradle","full":"Gaea's Cradle","front":"Gaea's Cradle","t":"Legendary Land","g":"land","mv":0,"c":"","ci":"G","img":"https://cards.scryfall.io/normal/front/2/5/25b0b816-0583-44aa-9dc5-f3ff48993a51.jpg?1783946299","art":"https://cards.scryfall.io/art_crop/front/2/5/25b0b816-0583-44aa-9dc5-f3ff48993a51.jpg?1783946299","artist":"Mark Zug"},"otawara soaring city":{"n":"Otawara, Soaring City","full":"Otawara, Soaring City","front":"Otawara, Soaring City","t":"Legendary Land","g":"land","mv":0,"c":"","ci":"U","img":"https://cards.scryfall.io/normal/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1783923816","art":"https://cards.scryfall.io/art_crop/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1783923816","artist":"Alayna Danner"},"boseiju who endures":{"n":"Boseiju, Who Endures","full":"Boseiju, Who Endures","front":"Boseiju, Who Endures","t":"Legendary Land","g":"land","mv":0,"c":"","ci":"G","img":"https://cards.scryfall.io/normal/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.jpg?1783923818","art":"https://cards.scryfall.io/art_crop/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.jpg?1783923818","artist":"Chris Ostrowski"},"minamo school at water s edge":{"n":"Minamo, School at Water's Edge","full":"Minamo, School at Water's Edge","front":"Minamo, School at Water's Edge","t":"Legendary Land","g":"land","mv":0,"c":"","ci":"U","img":"https://cards.scryfall.io/normal/front/7/5/7536292c-da25-41c8-ba28-1e35758a7f3d.jpg?1783944273","art":"https://cards.scryfall.io/art_crop/front/7/5/7536292c-da25-41c8-ba28-1e35758a7f3d.jpg?1783944273","artist":"Jeremy Jarvis"},"urza s saga":{"n":"Urza's Saga","full":"Urza's Saga","front":"Urza's Saga","t":"Enchantment Land — Urza's Saga","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/c/1/c1e0f201-42cb-46a1-901a-65bb4fc18f6c.jpg?1783926791","art":"https://cards.scryfall.io/art_crop/front/c/1/c1e0f201-42cb-46a1-901a-65bb4fc18f6c.jpg?1783926791","artist":"Titus Lunter"},"talon gates of madara":{"n":"Talon Gates of Madara","full":"Talon Gates of Madara","front":"Talon Gates of Madara","t":"Land — Gate","g":"land","mv":0,"c":"","ci":"","img":"https://cards.scryfall.io/normal/front/3/e/3e2c6447-e599-4b89-8a34-e46aa306a3f7.jpg?1793187495","art":"https://cards.scryfall.io/art_crop/front/3/e/3e2c6447-e599-4b89-8a34-e46aa306a3f7.jpg?1793187495","artist":"Jonathan Bartlett"},"cephalid coliseum":{"n":"Cephalid Coliseum","full":"Cephalid Coliseum","front":"Cephalid Coliseum","t":"Land","g":"land","mv":0,"c":"","ci":"U","img":"https://cards.scryfall.io/normal/front/0/3/03b9c9ed-fb6f-4f8d-bb1d-7999dec4245c.jpg?1783906997","art":"https://cards.scryfall.io/art_crop/front/0/3/03b9c9ed-fb6f-4f8d-bb1d-7999dec4245c.jpg?1783906997","artist":"John Avon"},"snow covered forest":{"n":"Snow-Covered Forest","full":"Snow-Covered Forest","front":"Snow-Covered Forest","t":"Basic Snow Land — Forest","g":"land","mv":0,"c":"","ci":"G","img":"https://cards.scryfall.io/normal/front/c/a/ca17acea-f079-4e53-8176-a2f5c5c408a1.jpg?1783928164","art":"https://cards.scryfall.io/art_crop/front/c/a/ca17acea-f079-4e53-8176-a2f5c5c408a1.jpg?1783928164","artist":"Adam Paquette"},"snow covered island":{"n":"Snow-Covered Island","full":"Snow-Covered Island","front":"Snow-Covered Island","t":"Basic Snow Land — Island","g":"land","mv":0,"c":"","ci":"U","img":"https://cards.scryfall.io/normal/front/3/b/3bfa5ebc-5623-4eec-89ea-dc187489ee4a.jpg?1783928167","art":"https://cards.scryfall.io/art_crop/front/3/b/3bfa5ebc-5623-4eec-89ea-dc187489ee4a.jpg?1783928167","artist":"Piotr Dura"}},"writeup":"Kinnan makes every mana creature and mana rock produce one extra mana. The plan is to play Kinnan on turn one or two, get far ahead on mana, and then either put together an infinite mana combo or start using Kinnan's own ability at the end of each opponent's turn.\n\n## How it wins\nAlmost every win starts with infinite mana. From there, Kinnan's ability digs through the library five cards at a time until it finds [[Thrasios, Triton Hero]]. Thrasios draws the whole library and [[Thassa's Oracle]] ends the game.\n\n## What to hold up\nThe deck plays the usual free counterspells. Keep one for the turn you go for the combo, and use the rest to stop faster decks from winning before you do.\n\n## How to stop it\n- Remove Kinnan early. The mana creatures are weak without their commander.\n- Counter or destroy [[Basalt Monolith]]. With Kinnan in play it makes infinite mana alone.\n- Do not let [[Seedborn Muse]] stay in play for a full turn around the table.","combos":[{"id":"ex1","title":"Basalt Monolith loop","cards":["kinnan bonder prodigy","basalt monolith"],"needs":"Kinnan in play.","steps":"Tap [[Basalt Monolith]] for {C}{C}{C}. Kinnan adds one more {C}.\nPay {3} to untap Basalt Monolith. One mana is left over.\nRepeat as often as you like.","result":"Infinite colorless mana."},{"id":"ex2","title":"Freed from the Real","cards":["kinnan bonder prodigy","birds of paradise","freed from the real"],"needs":"Kinnan and a creature that can tap for blue mana this turn. [[Pemmin's Aura]] works the same way.","steps":"Put [[Freed from the Real]] on [[Birds of Paradise]].\nTap Birds for {U}. Kinnan adds a second {U}.\nPay {U} to untap Birds. One {U} is left over.\nRepeat. Once you have plenty of blue mana for the untaps, tap Birds for the other colors.","result":"Infinite mana of every color."},{"id":"ex3","title":"Finishing the game","cards":["thrasios triton hero","thassa s oracle"],"needs":"Infinite mana of every color.","steps":"Use Kinnan's ability ({5}{G}{U}) until it puts [[Thrasios, Triton Hero]] into play.\nUse Thrasios's ability ({4}) until you have drawn your whole library.\nCast [[Thassa's Oracle]].","result":"You win when the Oracle's ability resolves."}],"top":[{"id":"ex4","title":"Free mana","cards":["chrome mox","mox diamond","lotus petal"],"text":"Artifacts that cost nothing and let Kinnan come down on the first turn. With Kinnan in play, each of them makes one extra mana."},{"id":"ex5","title":"","cards":["seedborn muse"],"text":"Untaps everything you control on each opponent's turn. With Kinnan in play, that is one use of his ability on every turn of the game."},{"id":"ex6","title":"Free counterspells","cards":["force of will","pact of negation","fierce guardianship"],"text":"They can be cast without mana, so the deck can tap out for its combo and still protect it."},{"id":"ex7","title":"Creature tutors","cards":["worldly tutor","green sun s zenith","finale of devastation"],"text":"They find the creature that is missing. [[Finale of Devastation]] with X at 10 or more also gives the whole team haste."},{"id":"ex8","title":"","cards":["bloom tender"],"text":"With Kinnan in play it taps for {G}{U}, and Kinnan adds a third mana. The best mana creature in the deck."},{"id":"ex9","title":"Card engines","cards":["rhystic study","mystic remora"],"text":"An early one of these draws so many cards that the table has to deal with it or fall behind."},{"id":"ex10","title":"","cards":["thrasios triton hero"],"text":"Where infinite mana goes. Thrasios turns it into the whole library in hand."},{"id":"ex11","title":"Untap auras","cards":["freed from the real","pemmin s aura"],"text":"On any creature that taps for blue mana, with Kinnan in play, either aura is infinite mana."},{"id":"ex12","title":"","cards":["basalt monolith"],"text":"Infinite colorless mana with Kinnan and nothing else. The first card to look for."},{"id":"ex13","title":"","cards":["kinnan bonder prodigy"],"text":"The whole deck is built around the commander: extra mana from the first turn and a way to spend endless mana later, both in one card."}],"countdown":true,"titles":{"writeup":"About the deck","combos":"Combo lines","top":"Top 10 cards","deck":"Decklist"},"sections":[{"k":"writeup","on":true},{"k":"combos","on":true},{"k":"top","on":true},{"k":"deck","on":true}]}/*END*/;
+
+function groupOf(type){
+  const t=String(type||'').split('—')[0];
+  for(const k of ['Land','Creature','Planeswalker','Battle','Artifact','Enchantment','Instant','Sorcery']) if(t.includes(k)) return k.toLowerCase();
+  return 'other';
+}
+
+/* ================= data ================= */
+function blank(){
+  return {id:uid(),updated:Date.now(),title:'',tagline:'',author:'',bracket:'5',size:'a4',newPage:false,
+    deckText:'',deck:[],missing:[],cards:{},
+    writeup:'',combos:[],top:[],countdown:true,
+    titles:{writeup:'About the deck',combos:'Combo lines',top:'Top 10',deck:'Decklist'},
+    sections:[{k:'writeup',on:true},{k:'combos',on:true},{k:'top',on:true},{k:'deck',on:true}]};
+}
+function migrate(p){
+  const b=blank();
+  for(const k in b) if(p[k]===undefined) p[k]=b[k];
+  p.titles=Object.assign({},b.titles,p.titles);
+  for(const s of b.sections) if(!p.sections.some(x=>x.k===s.k)) p.sections.push(s);
+  p.sections=p.sections.filter(s=>SECNAME[s.k]);
+  if(!SIZES[p.size]) p.size='a4';
+  p.combos.forEach(c=>{c.id=c.id||uid();c.cards=c.cards||[]});
+  p.top.forEach(c=>{c.id=c.id||uid();c.cards=c.cards||[]});
+  return p;
+}
+function loadDB(){
+  try{const j=JSON.parse(localStorage.getItem(LS)||'null');if(j&&j.items&&Object.keys(j.items).length)return j}catch(e){}
+  return null;
+}
+let DB=loadDB();
+if(!DB){
+  const first=EXAMPLE?Object.assign(blank(),JSON.parse(JSON.stringify(EXAMPLE)),{id:uid(),example:true,updated:Date.now()}):blank();
+  DB={v:1,current:first.id,items:{[first.id]:first}};
+}
+Object.values(DB.items).forEach(migrate);
+let P=DB.items[DB.current]||Object.values(DB.items)[0];
+DB.current=P.id;
+const ui={tab:'deck',closed:new Set(),deckMsg:null,busy:false};
+
+let saveT=0,prevT=0;
+function saveNow(){
+  const el=$('#saved');
+  try{localStorage.setItem(LS,JSON.stringify(DB));el.textContent='Saved in this browser';el.classList.remove('bad')}
+  catch(e){el.textContent='Could not save in this browser. Use “Save to file”.';el.classList.add('bad')}
+}
+function touch(){P.updated=Date.now();clearTimeout(saveT);saveT=setTimeout(saveNow,350);schedulePreview()}
+function schedulePreview(){clearTimeout(prevT);prevT=setTimeout(renderPreview,160)}
+const getPath=path=>path.split('.').reduce((o,k)=>o==null?o:o[k],P);
+function setPath(path,v){const ks=path.split('.'),last=ks.pop();ks.reduce((o,k)=>o[k],P)[last]=v}
+const pamName=p=>p.title.trim()||p.deck.filter(e=>e.cmd).map(e=>(p.cards[e.k]||{}).n).filter(Boolean).join(' & ')||'Untitled deck';
+
+/* ================= reading a pasted decklist ================= */
+const HEADS={commander:'cmd',commanders:'cmd','command zone':'cmd',companion:'side',deck:'main',main:'main',mainboard:'main','main board':'main','main deck':'main',maindeck:'main',sideboard:'side','side board':'side',side:'side',maybeboard:'maybe','maybe board':'maybe',maybe:'maybe',considering:'maybe',wishlist:'maybe',tokens:'maybe',about:'about'};
+const TYPEHEADS=/^(creatures?|lands?|basic lands?|instants?|sorcery|sorceries|artifacts?|enchantments?|planeswalkers?|battles?|spells?|others?|non-?creatures?)$/;
+function headKnown(line){
+  const t=line.replace(/\s*[\[(]\d+[\])]\s*$/,'').replace(/:$/,'').trim().toLowerCase();
+  if(HEADS[t]) return HEADS[t];
+  if(TYPEHEADS.test(t)||/[\[(]\d+[\])]\s*$/.test(line)||/:$/.test(line)) return 'keep';
+  return null;
+}
+function parseDeck(text){
+  const lines=String(text||'').split(/\r?\n/).map(l=>l.replace(/ /g,' ').trim());
+  const qre=/^(?:SB:\s*)?\d+\s*x?\s+\S/i;
+  const nonblank=lines.filter(Boolean);
+  const strict=nonblank.filter(l=>qre.test(l)).length>=Math.max(3,nonblank.length*.5);
+  const keepBoard=b=>(b==='cmd'||b==='about')?'main':b;
+  let board='main',title='';const map=new Map();
+  for(let line of lines){
+    if(!line) continue;
+    let m;
+    if((m=line.match(/^\/\/+\s*(?:deck ?)?name\s*:\s*(.+)$/i))){title=m[1].trim();continue}
+    if(/^\/\//.test(line)){const t=line.replace(/^\/+\s*/,'').replace(/\s*[\[(]\d+[\])]\s*$/,'').replace(/:$/,'').trim().toLowerCase();board=HEADS[t]||(/^side/.test(t)?'side':/^maybe/.test(t)?'maybe':'main');continue}
+    if(/^#/.test(line)) continue;
+    let side=false;
+    if(/^SB:\s*/i.test(line)){side=true;line=line.replace(/^SB:\s*/i,'')}
+    let qty=1;
+    if((m=line.match(/^(\d+)\s*x?\s+(.+)$/i))){qty=+m[1];line=m[2]}
+    else{
+      const hb=headKnown(line);
+      if(hb){board=hb==='keep'?keepBoard(board):hb;continue}
+      if(board==='about'){if((m=line.match(/^name\s+(.+)$/i)))title=m[1].trim();continue}
+      if(strict){board=keepBoard(board);continue}
+    }
+    if(board==='about') continue;
+    let cmd=board==='cmd',set='',maybe=board==='maybe';
+    if((m=line.match(/^\[([^\]]*)\]\s*(.+)$/))){set=m[1].split('#')[0];line=m[2]}
+    const hi=line.indexOf('#');
+    if(hi>=0){if(/!\s*commander/i.test(line.slice(hi)))cmd=true;line=line.slice(0,hi)}
+    if(/\*CMDR\*/i.test(line)) cmd=true;
+    line=line.replace(/\*[^*]*\*/g,' ').replace(/\^[^^]*\^/g,' ').replace(/<[^>]*>/g,' ');
+    line=line.replace(/\s\[([^\]]*)\]\s*$/,(_,c)=>{if(/commander/i.test(c))cmd=true;if(/maybe/i.test(c))maybe=true;else if(/sideboard/i.test(c))side=true;return ' '});
+    if((m=line.match(/^(.*?)\s+\(([A-Za-z0-9]{2,6})\)(?:\s+\S+)?\s*$/))){line=m[1];if(!set)set=m[2]}
+    const name=line.replace(/\s+/g,' ').trim().replace(/\s*\/{1,3}\s*/g,' // ');
+    if(!name||(maybe&&!cmd)) continue;
+    const b=cmd?'main':(side||board==='side')?'side':'main';
+    const front=name.split(' // ')[0];
+    const key=norm(front)+'|'+b,ex=map.get(key);
+    if(ex){ex.qty+=qty;ex.cmd=ex.cmd||cmd}
+    else map.set(key,{name,front,qty,board:b,cmd,set:/^[a-z0-9]{2,6}$/i.test(set)?set.toLowerCase():''});
+  }
+  return {entries:[...map.values()],title};
+}
+
+/* ================= Scryfall ================= */
+// Scryfall allows two card lookups a second. Going over gets "429 Too Many Requests"
+// and a 30-second lockout, so every request waits its turn and a lockout is waited out.
+const SF='https://api.scryfall.com',GAP=600;
+let sfNext=0,sfQueue=Promise.resolve(),cspBlocked=false;
+const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+document.addEventListener('securitypolicyviolation',e=>{if(/scryfall/i.test(String(e.blockedURI||'')))cspBlocked=true});
+class SfError extends Error{constructor(kind,status){super('Scryfall '+kind+(status?' '+status:''));this.kind=kind;this.status=status}}
+function sfFetch(url,opts,onWait){
+  const run=async()=>{
+    for(let attempt=0;;attempt++){
+      const wait=sfNext-Date.now();if(wait>0) await sleep(wait);
+      sfNext=Date.now()+GAP;
+      let r;
+      try{r=await fetch(url,opts)}
+      catch(e){await sleep(80);throw new SfError(cspBlocked?'blocked':navigator.onLine===false?'offline':'network')}
+      if(r.status===429){
+        if(attempt>=2) throw new SfError('busy',429);
+        for(let t=32;t>0;t--){if(onWait)onWait(t);await sleep(1000)}
+        sfNext=Date.now()+GAP;continue;
+      }
+      return r;
+    }
+  };
+  const p=sfQueue.then(run,run);
+  sfQueue=p.catch(()=>{});
+  return p;
+}
+function sfMessage(err){
+  const k=err&&err.kind;
+  if(k==='blocked') return 'The window this app is open in blocks the internet, so it cannot reach Scryfall. Open the app in Chrome or Edge instead.';
+  if(k==='offline') return 'This computer is offline. Connect to the internet and try again.';
+  if(k==='busy') return 'Scryfall keeps asking for a pause. Wait a couple of minutes and try again.';
+  if(k==='status') return `Scryfall answered with an error (code ${err.status}). Try again in a minute.`;
+  if(inFrame) return 'Could not reach Scryfall. This looks like a preview inside another app, which may block the internet. Open the app in Chrome or Edge instead.';
+  return 'Could not reach Scryfall. Check the internet connection, and whether a firewall, antivirus or ad blocker is blocking api.scryfall.com.';
+}
+const pauseMsg=t=>`Scryfall asked for a short pause. Carrying on in ${t} s…`;
+async function sfPost(ids,onWait){
+  const r=await sfFetch(SF+'/cards/collection',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({identifiers:ids})},onWait);
+  if(!r.ok) throw new SfError('status',r.status);
+  return r.json();
+}
+// a card object, or null when there is no such card; throws SfError when Scryfall cannot be asked
+async function lookupOne(q,onWait){
+  const r=await sfFetch(SF+'/cards/named?fuzzy='+encodeURIComponent(q),{headers:{Accept:'application/json'}},onWait);
+  if(r.status===404) return null;
+  if(!r.ok) throw new SfError('status',r.status);
+  return r.json();
+}
+function lev(a,b){
+  const d=Array.from({length:b.length+1},(_,j)=>j);
+  for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}
+  return d[b.length];
+}
+function closeName(q,c){
+  const a=norm(q);if(!a) return false;
+  return [c.name,c.name.split(' // ')[0],...(c.card_faces||[]).map(f=>f.name)].map(norm)
+    .some(b=>b===a||(a.length>=4&&b.includes(a))||lev(a,b)<=Math.max(1,Math.floor(Math.max(a.length,b.length)*.25)));
+}
+function cardRec(c){
+  const f=c.card_faces&&c.card_faces[0];
+  const iu=c.image_uris||(f&&f.image_uris)||{};
+  const front=f?f.name:c.name;
+  const type=(f&&f.type_line)||String(c.type_line||'').split(' // ')[0];
+  const cost=c.layout==='split'?(c.mana_cost||''):((f&&f.mana_cost)||c.mana_cost||'');
+  return {n:c.layout==='split'?c.name:front,full:c.name,front,t:type,g:groupOf(type),mv:c.cmc||0,c:cost,
+    ci:(c.color_identity||[]).join(''),img:iu.normal||'',art:iu.art_crop||'',artist:(f&&f.artist)||c.artist||''};
+}
+function addCard(p,c){const r=cardRec(c),k=norm(r.front);p.cards[k]=r;return k}
+async function resolveEntries(entries,prog,onWait){
+  const found=new Map();
+  const run=async(list,useSet)=>{
+    for(let i=0;i<list.length;i+=75){
+      const part=list.slice(i,i+75);
+      const j=await sfPost(part.map(e=>useSet&&e.set?{name:e.front,set:e.set}:{name:e.front}),onWait);
+      const idx=new Map();
+      for(const c of j.data||[]){
+        [c.name,c.name.split(' // ')[0],...(c.card_faces||[]).map(f=>f.name)].forEach((n,x)=>{const k=norm(n);if(x<2||!idx.has(k))idx.set(k,c)});
+      }
+      for(const e of part){const c=idx.get(norm(e.front))||idx.get(norm(e.name));if(c)found.set(e,c)}
+      prog(found.size);
+    }
+  };
+  await run(entries,true);
+  const hadSet=entries.filter(e=>!found.has(e)&&e.set);
+  if(hadSet.length) await run(hadSet,false);
+  for(const e of entries.filter(e=>!found.has(e)).slice(0,20)){
+    let c;
+    try{c=await lookupOne(e.name,onWait)}catch(err){break}
+    if(c&&closeName(e.name,c))found.set(e,c);
+    prog(found.size);
+  }
+  return found;
+}
+function prune(p){
+  const keep=new Set([...p.deck.map(e=>e.k),...p.combos.flatMap(c=>c.cards),...p.top.flatMap(t=>t.cards)]);
+  for(const k in p.cards) if(!keep.has(k)) delete p.cards[k];
+}
+function setDeckMsg(msg,kind){
+  ui.deckMsg={msg,kind};
+  const el=$('#deckMsg');if(el){el.textContent=msg;el.className='msg '+kind}
+}
+async function loadDeck(){
+  if(ui.busy) return;
+  const pp=P,parsed=parseDeck(pp.deckText),total=parsed.entries.length;
+  if(!total){setDeckMsg('Paste a decklist in the box first.','warn');return}
+  ui.busy=true;setDeckMsg(`Looking up ${total} cards…`,'busy');renderEditor();
+  try{
+    const found=await resolveEntries(parsed.entries,n=>setDeckMsg(`Looking up cards… ${n} of ${total}`,'busy'),t=>setDeckMsg(pauseMsg(t),'busy'));
+    const prevCmd=new Set(pp.deck.filter(e=>e.cmd).map(e=>e.k));
+    const deck=[],missing=[],seen=new Map();
+    for(const e of parsed.entries){
+      const c=found.get(e);
+      if(!c){missing.push({name:e.name,q:e.qty,b:e.board,cmd:e.cmd});continue}
+      const k=addCard(pp,c),id=k+'|'+e.board,ex=seen.get(id);
+      if(ex){ex.q+=e.qty;ex.cmd=ex.cmd||e.cmd}
+      else{const d={k,q:e.qty,b:e.board,cmd:!!e.cmd};seen.set(id,d);deck.push(d)}
+    }
+    if(!deck.some(e=>e.cmd)) deck.forEach(e=>{if(prevCmd.has(e.k))e.cmd=true});
+    pp.deck=deck;pp.missing=missing;
+    if(!pp.title&&parsed.title) pp.title=parsed.title;
+    delete pp.example;prune(pp);
+    const n=deck.reduce((s,e)=>s+e.q,0);
+    setDeckMsg(`${n} cards loaded`+(missing.length?`, ${missing.length} not recognized.`:'.'),missing.length?'warn':'ok');
+  }catch(err){
+    setDeckMsg(sfMessage(err),'err');
+  }
+  ui.busy=false;
+  if(pp===P){touch();renderAll()}else saveNow();
+}
+async function fixMissing(i){
+  const pp=P,m=pp.missing[i];if(!m) return;
+  setDeckMsg(`Looking for “${m.name}”…`,'busy');
+  let c;
+  try{c=await lookupOne(m.name,t=>setDeckMsg(pauseMsg(t),'busy'))}
+  catch(err){setDeckMsg(sfMessage(err),'err');return}
+  if(!c){setDeckMsg(`Still no card called “${m.name}”. Check the spelling.`,'err');return}
+  if(!closeName(m.name,c)){setDeckMsg(`No card called “${m.name}”. The closest is “${c.name}”. Type that name if it is the one you meant.`,'err');return}
+  const k=addCard(pp,c),ex=pp.deck.find(e=>e.k===k&&e.b===m.b);
+  if(ex) ex.q+=m.q;else pp.deck.push({k,q:m.q,b:m.b,cmd:!!m.cmd});
+  pp.missing.splice(pp.missing.indexOf(m),1);
+  setDeckMsg(`Added ${pp.cards[k].n}.`,'ok');
+  if(pp===P){touch();renderEditor()}
+}
+function groupedDeck(){
+  const by={};
+  for(const e of P.deck){const c=P.cards[e.k];if(!c)continue;const g=e.cmd?'commander':e.b==='side'?'side':c.g;(by[g]=by[g]||[]).push(e)}
+  const out=[];
+  for(const [k,label] of GROUPS){
+    const items=by[k];if(!items) continue;
+    items.sort((a,b)=>{const A=P.cards[a.k],B=P.cards[b.k];return (B.mv-A.mv)||A.n.localeCompare(B.n,'en',{sensitivity:'base'})});
+    const count=items.reduce((s,e)=>s+e.q,0);
+    out.push({k,label:k==='commander'&&count>1?'Commanders':label,count,items});
+  }
+  return out;
+}
+
+/* ================= text formatting ================= */
+const SYM=/^(?:\d{1,2}|[WUBRGCXYZSTQE]|[WUBRGC2]\/[WUBRGP]|[WUBRG]\/[WUBRG]\/P|∞|½)$/i;
+function sym(x){
+  const code=x.toUpperCase().replace(/\//g,'').replace('∞','INFINITY').replace('½','HALF');
+  return `<img class="ms" src="https://svgs.scryfall.io/card-symbols/${encodeURIComponent(code)}.svg" alt="{${esc(x)}}">`;
+}
+function costHtml(cost){
+  if(!cost) return '';
+  return cost.split(' // ').map(part=>(part.match(/\{[^}]+\}/g)||[]).map(s=>sym(s.slice(1,-1))).join('')).filter(Boolean).join('<i class="sl">//</i>');
+}
+function inline(s){
+  s=esc(s);
+  s=s.replace(/\[\[([^\]]+)\]\]/g,(m,n)=>{const c=P.cards[norm(n.replace(/&#39;/g,"'").replace(/&amp;/g,'&'))];return `<span class="cn">${c?esc(c.n):n}</span>`});
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\*([^*\n]+)\*/g,'<i>$1</i>');
+  s=s.replace(/\{([^{}\s]{1,5})\}/g,(m,x)=>SYM.test(x)?sym(x):m);
+  return s;
+}
+function paras(text){
+  return String(text||'').replace(/\r/g,'').split(/\n\s*\n/).map(b=>b.trim()).filter(Boolean)
+    .map(b=>`<p>${b.split('\n').map(l=>inline(l.trim())).join('<br>')}</p>`).join('');
+}
+function proseEls(text){
+  const out=[],special=/^(#{1,3}|[-*•])\s+/;
+  for(const blk of String(text||'').replace(/\r/g,'').split(/\n\s*\n/)){
+    const lines=blk.split('\n').map(l=>l.trim()).filter(Boolean);
+    let i=0;
+    while(i<lines.length){
+      const l=lines[i];
+      if(/^#{1,3}\s+/.test(l)){out.push(h(`<h3>${inline(l.replace(/^#+\s+/,''))}</h3>`));i++;continue}
+      if(/^[-*•]\s+/.test(l)){
+        const items=[];
+        while(i<lines.length&&/^[-*•]\s+/.test(lines[i])){items.push(lines[i].replace(/^[-*•]\s+/,''));i++}
+        out.push(h(`<ul>${items.map(x=>`<li>${inline(x)}</li>`).join('')}</ul>`));continue;
+      }
+      const ps=[];
+      while(i<lines.length&&!special.test(lines[i])){ps.push(lines[i]);i++}
+      out.push(h(`<p>${ps.map(inline).join('<br>')}</p>`));
+    }
+  }
+  return out;
+}
+
+/* ================= the pages ================= */
+function cardImg(k){
+  const c=P.cards[k];
+  if(!c||!c.img) return `<span class="card">${esc(c?c.n:k)}</span>`;
+  return `<img class="card" src="${esc(c.img)}" alt="${esc(c.n)}">`;
+}
+function identity(){
+  const cmds=P.deck.filter(e=>e.cmd),src=cmds.length?cmds:P.deck;
+  if(!src.length) return null;
+  const s=new Set();
+  src.forEach(e=>String((P.cards[e.k]||{}).ci||'').split('').forEach(c=>s.add(c)));
+  const o='WUBRG'.split('').filter(c=>s.has(c));
+  return o.length?o:['C'];
+}
+function coverEls(){
+  const cmds=P.deck.filter(e=>e.cmd).map(e=>P.cards[e.k]).filter(Boolean).slice(0,2);
+  const cmdNames=cmds.map(c=>c.n).join(' & ');
+  const title=P.title.trim()||cmdNames||'Untitled deck';
+  const ci=identity();
+  const arts=cmds.filter(c=>c.art);
+  const meta=[];
+  if(cmdNames&&P.title.trim()) meta.push(`<span><b>Commander${cmds.length>1?'s':''}</b>${esc(cmdNames)}</span>`);
+  if(P.author.trim()) meta.push(`<span><b>Deck by</b>${esc(P.author.trim())}</span>`);
+  const eyebrow=(P.bracket&&BR[P.bracket]?`<span class="badge">Bracket ${esc(P.bracket)}<i>${BR[P.bracket]}</i></span>`:'')+(ci?`<span class="pips">${ci.map(sym).join('')}</span>`:'');
+  const cover=h(`<div class="cover">
+    ${arts.length?`<div class="art">${arts.map(c=>`<img src="${esc(c.art)}" alt="">`).join('')}</div>`:''}
+    <div class="shade"></div>
+    <div class="txt">${eyebrow?`<div class="eyebrow">${eyebrow}</div>`:''}<h1>${esc(title)}</h1>
+      ${P.tagline.trim()?`<p class="tag">${inline(P.tagline.trim())}</p>`:''}
+      ${meta.length?`<div class="meta">${meta.join('')}</div>`:''}</div>
+    ${cmds.length?`<div class="cmd${cmds.length>1?' two':''}">${cmds.map(c=>c.img?`<img class="card" src="${esc(c.img)}" alt="${esc(c.n)}">`:'').join('')}</div>`:''}
+    ${arts.length?`<div class="credit">Art: ${esc([...new Set(arts.map(c=>c.artist).filter(Boolean))].join(' / '))}</div>`:''}
+  </div>`);
+  const stripe=h(`<div class="stripe">${(ci||['C']).map(c=>`<i style="background:${CI[c]}"></i>`).join('')}</div>`);
+  return [cover,stripe];
+}
+function comboEl(c,i){
+  const n=(c.cards||[]).length;
+  const steps=String(c.steps||'').split(/\n+/).map(s=>s.trim().replace(/^(\d+[.)]|[-*•])\s+/,'')).filter(Boolean);
+  return h(`<div class="combo" data-ref="combos.${i}">${n?`<div class="imgs n${Math.min(n,5)}">${c.cards.map(cardImg).join('')}</div>`:''}<div class="body">
+    <div class="eb">Line ${i+1}</div><h4>${inline(c.title||c.cards.map(k=>(P.cards[k]||{}).n||k).join(' + ')||'Untitled line')}</h4>
+    ${String(c.needs||'').trim()?`<p><span class="plab">Needs</span>${inline(c.needs.trim()).replace(/\n/g,'<br>')}</p>`:''}
+    ${steps.length?`<ol>${steps.map(s=>`<li>${inline(s)}</li>`).join('')}</ol>`:''}
+    ${String(c.result||'').trim()?`<p class="res"><span class="plab">Result</span>${inline(c.result.trim())}</p>`:''}
+  </div></div>`);
+}
+function topEl(t,num,i){
+  const n=(t.cards||[]).length;
+  return h(`<div class="top" data-ref="top.${i}"><div class="num">${num}</div>${n?`<div class="imgs n${Math.min(n,5)}">${t.cards.map(cardImg).join('')}</div>`:''}<div class="body">
+    <h4>${inline(t.title||t.cards.map(k=>(P.cards[k]||{}).n||k).join(' & ')||'Untitled')}</h4>${paras(t.text)}</div></div>`);
+}
+function deckItems(){
+  const list=[];
+  for(const g of groupedDeck()){list.push({h:1,label:g.label,count:g.count});for(const e of g.items)list.push({e,g:g.label})}
+  return list;
+}
+function buildFlow(){
+  const flow=[];
+  for(const s of P.sections){
+    if(!s.on) continue;
+    let part=[],extra='';
+    if(s.k==='writeup'){
+      const els=proseEls(P.writeup);
+      if(els.length) part=[{prose:els,cols:(P.size==='a5'||P.writeup.length<700)?1:2}];
+    }else if(s.k==='combos') part=P.combos.map((c,i)=>({el:comboEl(c,i)}));
+    else if(s.k==='top') part=P.top.map((t,i)=>({el:topEl(t,P.countdown?P.top.length-i:i+1,i)}));
+    else if(s.k==='deck'&&P.deck.length){
+      const n=P.deck.reduce((a,e)=>a+e.q,0);
+      extra=`<small>${n} cards</small>`;part=[{deck:deckItems()}];
+    }
+    if(!part.length) continue;
+    if(P.newPage&&flow.length) flow.push({br:1});
+    const head=h(`<h2 class="sec">${esc(P.titles[s.k]||SECNAME[s.k])}${extra}</h2>`);
+    head.dataset.keep='1';head.dataset.sec=s.k;
+    flow.push({el:head},...part);
+  }
+  return flow;
+}
+function fillCols(list,cap,RH,GH,GG){
+  const cols=[];let cur,used;
+  const start=()=>{cur=[];cols.push(cur);used=0};
+  start();
+  for(const it of list){
+    const need=it.h?GH+(cur.length?GG:0)+RH:RH;
+    if(used+need>cap&&cur.length) start();
+    if(!cur.length&&!it.h){cur.push({h:1,label:it.g,cont:1});used+=GH}
+    used+=it.h?GH+(cur.length?GG:0):RH;
+    cur.push(it);
+  }
+  return cols;
+}
+function paginate(stage){
+  stage.dataset.size=P.size;stage.replaceChildren();
+  const pages=[];let page,content;
+  const newPage=()=>{page=h('<div class="pagewrap"><div class="page"><div class="content"></div><div class="pfoot"></div></div></div>');stage.appendChild(page);content=$('.content',page);pages.push(page)};
+  const over=()=>content.scrollHeight>content.clientHeight+1;
+  const hasCover=()=>!!$('.cover',page);
+  const takeHead=()=>{const last=content.lastElementChild;if(last&&last.dataset.keep){last.remove();return last}return null};
+  newPage();
+  const [cov,stripe]=coverEls();
+  page.firstElementChild.insertBefore(stripe,content);page.firstElementChild.insertBefore(cov,stripe);
+
+  function placeBlock(el){
+    content.appendChild(el);
+    if(!over()||content.children.length===1) return;
+    el.remove();
+    const carry=takeHead();
+    if(!content.children.length&&!hasCover()){if(carry)content.appendChild(carry);content.appendChild(el);return}
+    newPage();if(carry)content.appendChild(carry);content.appendChild(el);
+  }
+  function placeProse(els,cols){
+    let rest=els.slice();
+    while(rest.length){
+      const box=h(`<div class="prose${cols===1?' one':''}" style="--pcols:${cols}"></div>`);
+      box.append(...rest);content.appendChild(box);
+      if(!over()) return;
+      let lo=0,hi=rest.length-1;
+      while(lo<hi){const mid=Math.ceil((lo+hi)/2);box.replaceChildren(...rest.slice(0,mid));if(over())hi=mid-1;else lo=mid}
+      let k=lo;
+      while(k>0&&rest[k-1].tagName==='H3') k--;
+      if(k===0){
+        box.remove();
+        const kids=content.children.length,onlyHead=kids===1&&content.firstElementChild.dataset.keep;
+        if((kids===0||onlyHead)&&!hasCover()){
+          const b2=h(`<div class="prose${cols===1?' one':''}" style="--pcols:${cols}"></div>`);
+          b2.appendChild(rest[0]);content.appendChild(b2);rest=rest.slice(1);
+          if(rest.length) newPage();
+          continue;
+        }
+        const carry=takeHead();newPage();if(carry)content.appendChild(carry);
+        continue;
+      }
+      box.replaceChildren(...rest.slice(0,k));rest=rest.slice(k);newPage();
+    }
+  }
+  function placeDeck(list){
+    const small=P.size==='a5',N=small?2:3,RH=small?4.1:4.5,GH=small?6:6.6,GG=small?2.2:2.8;
+    let rest=list,guard=0;
+    while(rest.length&&guard++<40){
+      const box=h(`<div class="deckcols" style="--cols:${N};--rh:${RH}mm;--gh:${GH}mm;--gg:${GG}mm"></div>`);
+      content.appendChild(box);
+      const avail=(content.getBoundingClientRect().bottom-box.getBoundingClientRect().top)/MM-.6;
+      const fresh=content.children.length===1||(content.children.length===2&&content.firstElementChild.dataset.keep&&!hasCover());
+      if(avail<GH+RH*7&&!fresh){box.remove();const carry=takeHead();newPage();if(carry)content.appendChild(carry);continue}
+      let cols=fillCols(rest,avail,RH,GH,GG);
+      if(cols.length<=N){
+        const total=rest.reduce((s,it)=>s+(it.h?GH+GG:RH),0);
+        let lo=Math.min(avail,Math.max(GH+RH,total/N-GH)),hi=avail;
+        for(let i=0;i<16;i++){const mid=(lo+hi)/2;if(fillCols(rest,mid,RH,GH,GG).length<=N)hi=mid;else lo=mid}
+        cols=fillCols(rest,hi,RH,GH,GG);rest=[];
+      }else{rest=cols.slice(N).flat().filter(it=>!it.cont);cols=cols.slice(0,N)}
+      box.innerHTML=cols.map(col=>`<div class="dcol">${col.map(it=>{
+        if(it.h) return `<div class="dg">${esc(it.label)}${it.cont?'<i>continued</i>':`<span>${it.count}</span>`}</div>`;
+        const c=P.cards[it.e.k];
+        return `<div class="dr"><span class="nm">${esc(c.n)}${it.e.q>1?` <span class="q">×${it.e.q}</span>`:''}</span><span class="cost">${costHtml(c.c)}</span></div>`;
+      }).join('')}</div>`).join('');
+      if(rest.length) newPage();
+    }
+  }
+
+  const flow=buildFlow();
+  if(!flow.length) content.appendChild(h('<p class="empty">Your pamphlet shows up here as you fill it in. Start on the Deck tab: paste your decklist and press Load cards.</p>'));
+  for(const it of flow){
+    if(it.br){if(content.children.length)newPage();continue}
+    if(it.el) placeBlock(it.el);
+    else if(it.prose) placeProse(it.prose,it.cols);
+    else if(it.deck) placeDeck(it.deck);
+  }
+  const title=pamName(P);
+  pages.forEach((pg,i)=>{$('.pfoot',pg).innerHTML=`<span class="t">${esc(title)}</span><span class="fine">Unofficial fan content · card images © Wizards of the Coast, via Scryfall</span><span class="pg">${i+1} / ${pages.length}</span>`});
+  return pages;
+}
+function fitPreview(){
+  const pv=$('#preview'),w=pv.clientWidth-44;
+  if(w<60) return;
+  $('#pages').style.setProperty('--s',Math.min(1.15,w/(SIZES[P.size][0]*MM)).toFixed(4));
+}
+function reveal(sel,always){
+  const pv=$('#preview');
+  if(!pv.offsetParent) return true;
+  if(!sel){pv.scrollTo({top:0,behavior:'smooth'});return true}
+  const el=$(sel,$('#pages'));if(!el) return false;
+  const r=el.getBoundingClientRect(),pr=pv.getBoundingClientRect();
+  if(always||r.top<pr.top+8||r.bottom>pr.bottom-8) pv.scrollTo({top:Math.max(0,pv.scrollTop+r.top-pr.top-26),behavior:'smooth'});
+  return true;
+}
+function renderPreview(){
+  clearTimeout(prevT);
+  const stage=$('#stage'),live=$('#pages');
+  paginate(stage);
+  // keep the pictures already on screen, so typing never makes them blink
+  const pool=new Map();
+  $$('img',live).forEach(im=>{const a=pool.get(im.src)||[];a.push(im);pool.set(im.src,a)});
+  $$('img',stage).forEach(im=>{const a=pool.get(im.src);if(a&&a.length){const old=a.pop();old.className=im.className;old.alt=im.alt;im.replaceWith(old)}});
+  live.dataset.size=P.size;
+  live.replaceChildren(...stage.children);
+  const [w,hh]=SIZES[P.size];
+  $('#pageRule').textContent=`@page{size:${w}mm ${hh}mm;margin:0}`;
+  fitPreview();
+  if(ui.want){const w2=ui.want;ui.want=null;reveal(w2)}
+}
+
+/* ================= the editor ================= */
+const TABS=[['deck','Deck'],['cover','Cover'],['writeup','Writeup'],['combos','Combos'],['top','Top 10'],['pages','Pages']];
+const fid=p=>'f-'+p.replace(/\./g,'-');
+const fText=(label,path,ph='')=>`<label class="field"><span>${label}</span><input type="text" id="${fid(path)}" data-bind="${path}" value="${esc(getPath(path))}" placeholder="${esc(ph)}"></label>`;
+const fArea=(label,path,rows,ph='',hint='')=>`<label class="field"><span>${label}</span><textarea id="${fid(path)}" data-bind="${path}" rows="${rows}" placeholder="${esc(ph)}">\n${esc(getPath(path))}</textarea>${hint?`<small>${hint}</small>`:''}</label>`;
+const fCheck=(label,path)=>`<label class="check"><input type="checkbox" id="${fid(path)}" data-bind="${path}" ${getPath(path)?'checked':''}><span>${label}</span></label>`;
+const FORMAT_HINT='Leave an empty line between paragraphs. <b>## Heading</b> makes a heading, <b>- text</b> a bullet, <b>**bold**</b> and <b>*italic*</b> work, <b>[[Card name]]</b> marks a card and <b>{U}{B}</b> shows mana symbols.';
+const INLINE_HINT='<b>[[Card name]]</b> marks a card, <b>{U}{B}</b> shows mana symbols, <b>**bold**</b> works too.';
+function picker(path,label){
+  const keys=getPath(path)||[];
+  return `<div class="field"><span>${label}</span><div class="picker" data-list="${path}">
+    <div class="chips">${keys.map((k,i)=>{const c=P.cards[k],n=c?c.n:k;return `<span class="chip">${c&&c.img?`<img src="${esc(c.img)}" alt="">`:''}<span>${esc(n)}</span><button type="button" class="x" data-act="unpick" data-path="${path}" data-i="${i}" aria-label="Remove ${esc(n)}">×</button></span>`}).join('')}</div>
+    <input type="text" class="pick-in" id="${fid(path)}-add" autocomplete="off" spellcheck="false" placeholder="${P.deck.length?'Type a card name to add it…':'Type a card name (load your deck first for suggestions)'}">
+    <div class="sugg" hidden></div></div></div>`;
+}
+const itemTools=(path,i,n)=>`<span class="tools"><button type="button" class="icon" data-act="up" data-path="${path}" data-i="${i}" title="Move up" aria-label="Move up" ${i?'':'disabled'}>↑</button><button type="button" class="icon" data-act="down" data-path="${path}" data-i="${i}" title="Move down" aria-label="Move down" ${i<n-1?'':'disabled'}>↓</button><button type="button" class="icon del" data-act="del" data-path="${path}" data-i="${i}" title="Remove" aria-label="Remove">✕</button></span>`;
+
+const TABHTML={
+  deck(){
+    const n=P.deck.reduce((s,e)=>s+e.q,0),cmds=P.deck.filter(e=>e.cmd);
+    const msg=ui.deckMsg||{msg:'',kind:''};
+    return `
+    ${inFrame?'<div class="note warn"><b>This looks like a preview inside another app.</b> Previews often block the internet, so cards may not load here. If that happens, open the app in Chrome or Edge instead.</div>':''}
+    ${P.example?'<div class="note"><b>This is an example pamphlet</b> so you can see how everything fits together. Press <b>New deck</b> at the top to start your own. You can delete the example whenever you like.</div>':''}
+    <label class="field"><span>Decklist</span>
+      <textarea id="f-deckText" data-bind="deckText" rows="9" spellcheck="false" placeholder="1 Kinnan, Bonder Prodigy&#10;1 Basalt Monolith&#10;1 Birds of Paradise&#10;…">\n${esc(P.deckText)}</textarea>
+      <small>On Aetherhub or Deckstats, export or copy the deck as text and paste it here, one card per line. Set codes, “SB:” lines and commander marks are understood.</small></label>
+    <div class="row"><button type="button" class="btn primary" data-act="load" ${ui.busy?'disabled':''}>${P.deck.length?'Load cards again':'Load cards'}</button><span id="deckMsg" class="msg ${msg.kind}" role="status">${esc(msg.msg)}</span></div>
+    ${P.missing.length?`<div class="miss"><h3 class="h">Not recognized (${P.missing.length})</h3><p class="hint">Fix the spelling and press Find, or remove the line.</p>
+      ${P.missing.map((m,i)=>`<div class="mrow"><input type="text" id="${fid('missing.'+i+'.name')}" data-bind="missing.${i}.name" value="${esc(m.name)}" aria-label="Card name"><button type="button" class="btn small" data-act="fix" data-i="${i}">Find</button><button type="button" class="btn small ghost" data-act="dropmiss" data-i="${i}">Remove</button></div>`).join('')}</div>`:''}
+    ${P.deck.length?`
+      ${cmds.length?'':'<div class="note warn"><b>No commander marked yet.</b> Click the ♛ next to your commander in the list below. It goes on the cover.</div>'}
+      <div class="dl"><div class="row" style="justify-content:space-between;margin-top:9px"><h3 class="h">${n} cards</h3><span class="hint">♛ = commander</span></div>
+      ${groupedDeck().map(g=>`<h4>${g.label}<span>${g.count}</span></h4>${g.items.map(e=>{const c=P.cards[e.k];return `<div class="dl-r"><button type="button" class="crown${e.cmd?' on':''}" data-act="cmd" data-k="${esc(e.k)}" data-b="${e.b}" title="${e.cmd?'Commander. Click to unmark.':'Mark as commander'}" aria-label="${e.cmd?'Unmark':'Mark'} ${esc(c.n)} as commander" aria-pressed="${!!e.cmd}">♛</button><span class="nm">${esc(c.n)}${e.q>1?' ×'+e.q:''}</span><span class="mv">${c.g==='land'?'':c.mv}</span></div>`}).join('')}`).join('')}
+      </div>`:''}`;
+  },
+  cover(){
+    const cmds=P.deck.filter(e=>e.cmd).map(e=>(P.cards[e.k]||{}).n).filter(Boolean);
+    return `
+    ${fText('Deck name','title',cmds.join(' & ')||'e.g. Kinnan Turbo')}
+    ${fText('One line about the deck','tagline','e.g. Fast mana into an early infinite combo')}
+    ${fText('Deck by','author','Your name')}
+    <label class="field"><span>Bracket</span><select id="f-bracket" data-bind="bracket">
+      <option value="">Do not show a bracket</option>${Object.keys(BR).map(k=>`<option value="${k}" ${P.bracket===k?'selected':''}>Bracket ${k} · ${BR[k]}</option>`).join('')}</select></label>
+    <p class="hint">${cmds.length?`The cover shows <b>${esc(cmds.join(' & '))}</b> and its art and colors. Change the commander on the Deck tab (♛).`:'The cover shows your commander’s card, art and colors once you mark it on the Deck tab (♛).'}</p>`;
+  },
+  writeup(){
+    return `${fText('Section title','titles.writeup')}
+    ${fArea('What the deck is about','writeup',20,'What does the deck try to do? How does it win? What should a new pilot or an opponent know?',FORMAT_HINT)}`;
+  },
+  combos(){
+    const n=P.combos.length;
+    return `${fText('Section title','titles.combos')}
+    ${P.combos.map((c,i)=>`<details class="item" data-id="${c.id}" data-ref="combos.${i}" ${ui.closed.has(c.id)?'':'open'}>
+      <summary><span class="tagn">Line ${i+1}</span><span class="st" id="st-combos-${i}">${esc(c.title||'Untitled line')}</span>${itemTools('combos',i,n)}</summary>
+      <div class="in">
+        ${fText('Title',`combos.${i}.title`,'e.g. Basalt Monolith loop')}
+        ${picker(`combos.${i}.cards`,'Cards shown')}
+        ${fArea('What you need first',`combos.${i}.needs`,2,'e.g. Kinnan in play')}
+        ${fArea('Steps, one per line',`combos.${i}.steps`,5,'Tap Basalt Monolith for {C}{C}{C}\nPay {3} to untap it\nRepeat')}
+        ${fText('Result',`combos.${i}.result`,'e.g. Infinite colorless mana')}
+      </div></details>`).join('')}
+    <div class="row"><button type="button" class="btn" data-act="add-combo">+ Add a combo line</button></div>
+    <p class="hint">${INLINE_HINT} Steps are numbered for you.</p>`;
+  },
+  top(){
+    const n=P.top.length;
+    return `${fText('Section title','titles.top')}
+    ${fCheck('Count down, so number 1 comes last','countdown')}
+    ${P.top.map((t,i)=>`<details class="item" data-id="${t.id}" data-ref="top.${i}" ${ui.closed.has(t.id)?'':'open'}>
+      <summary><span class="tagn">#${P.countdown?n-i:i+1}</span><span class="st" id="st-top-${i}">${esc(t.title||t.cards.map(k=>(P.cards[k]||{}).n||k).join(' & ')||'Untitled')}</span>${itemTools('top',i,n)}</summary>
+      <div class="in">
+        ${fText('Title',`top.${i}.title`,'Leave empty to use the card name')}
+        ${picker(`top.${i}.cards`,'Cards shown (one or more)')}
+        ${fArea('Description',`top.${i}.text`,4,'Why is this card here? How is it used?')}
+      </div></details>`).join('')}
+    <div class="row"><button type="button" class="btn" data-act="add-top">+ Add an entry</button>${n?'':'<button type="button" class="btn" data-act="add-top10">+ Add 10 empty entries</button>'}</div>
+    <p class="hint">${INLINE_HINT}</p>`;
+  },
+  pages(){
+    return `
+    <label class="field"><span>Paper size</span><select id="f-size" data-bind="size">${Object.keys(SIZES).map(k=>`<option value="${k}" ${P.size===k?'selected':''}>${SIZES[k][2]}</option>`).join('')}</select>
+      <small>A4 suits printing. A5 has larger text for its size, which reads better on a phone.</small></label>
+    ${fCheck('Start every section on a new page','newPage')}
+    <div class="field"><span>Sections and their order</span>
+      ${P.sections.map((s,i)=>`<div class="secrow">${fCheck(esc(P.titles[s.k]||SECNAME[s.k]),`sections.${i}.on`)}<span class="tools"><button type="button" class="icon" data-act="up" data-path="sections" data-i="${i}" aria-label="Move up" title="Move up" ${i?'':'disabled'}>↑</button><button type="button" class="icon" data-act="down" data-path="sections" data-i="${i}" aria-label="Move down" title="Move down" ${i<P.sections.length-1?'':'disabled'}>↓</button></span></div>`).join('')}
+      <small>A section with nothing in it is left out automatically.</small></div>
+    <div class="note"><b>Making the PDF.</b> Press <b>Save as PDF</b> at the top. In the print window that opens, choose <b>Save as PDF</b> as the printer (on a computer, “Microsoft Print to PDF” also works), then save. The pages on the right are exactly what you get.</div>`;
+  }
+};
+const panel=$('#panel');
+function renderTabs(){
+  $('#tabs').innerHTML=TABS.map(([k,l])=>`<button type="button" role="tab" data-tab="${k}" aria-selected="${ui.tab===k}">${l}</button>`).join('');
+}
+function renderEditor(){
+  const ae=document.activeElement,id=ae&&panel.contains(ae)?ae.id:'',st=panel.scrollTop;
+  panel.innerHTML=TABHTML[ui.tab]();
+  panel.scrollTop=st;
+  if(id){const el=document.getElementById(id);if(el)el.focus({preventScroll:true})}
+}
+function renderPick(){
+  const list=Object.values(DB.items).sort((a,b)=>b.updated-a.updated);
+  $('#pick').innerHTML=list.map(p=>`<option value="${p.id}" ${p.id===P.id?'selected':''}>${esc((p.example?'Example: ':'')+pamName(p))}</option>`).join('');
+}
+function renderAll(){renderPick();renderTabs();renderEditor();renderPreview()}
+function openPam(id){
+  if(!DB.items[id]) return;
+  P=DB.items[id];DB.current=id;ui.closed.clear();ui.deckMsg=null;
+  saveNow();renderAll();panel.scrollTop=0;
+}
+let toastT=0;
+function toast(msg,ms=4000,actLabel,fn){
+  const t=$('#toast');clearTimeout(toastT);
+  t.innerHTML=`<span>${esc(msg)}</span>${actLabel?`<button type="button">${esc(actLabel)}</button>`:''}`;
+  if(actLabel) $('button',t).onclick=()=>{t.hidden=true;fn()};
+  t.hidden=false;toastT=setTimeout(()=>{t.hidden=true},ms);
+}
+
+/* picking cards */
+function suggest(input){
+  const box=$('.sugg',input.parentNode),q=norm(input.value),raw=input.value.trim();
+  if(!q){box.hidden=true;return}
+  const have=new Set(getPath(input.closest('.picker').dataset.list)),inDeck=new Set(P.deck.map(e=>e.k));
+  const hits=Object.entries(P.cards).filter(([k,c])=>!have.has(k)&&(k.includes(q)||norm(c.full).includes(q)))
+    .sort((a,b)=>(b[0].startsWith(q)-a[0].startsWith(q))||(inDeck.has(b[0])-inDeck.has(a[0]))||a[1].n.localeCompare(b[1].n)).slice(0,8);
+  let html=hits.map(([k,c],i)=>`<div class="opt${i?'':' on'}" data-k="${esc(k)}"><span>${esc(c.n)}</span><small>${esc(c.t.split(' — ')[0])}${inDeck.has(k)?'':' · not in the deck'}</small></div>`).join('');
+  if(raw.length>=3&&!hits.some(([k])=>k===q)) html+=`<div class="opt${hits.length?'':' on'}" data-q="${esc(raw)}"><span>Find “${esc(raw)}” on Scryfall</span><small>any card</small></div>`;
+  box.innerHTML=html;box.hidden=!html;
+}
+function addPick(path,k){
+  const arr=getPath(path);if(!arr.includes(k)) arr.push(k);
+  touch();renderEditor();
+  const el=document.getElementById(fid(path)+'-add');if(el)el.focus({preventScroll:true});
+}
+async function choose(input,opt){
+  const path=input.closest('.picker').dataset.list,box=$('.sugg',input.parentNode),pp=P;
+  if(opt.dataset.k){addPick(path,opt.dataset.k);return}
+  if(opt.dataset.pending&&ui.pending){const c=ui.pending;ui.pending=null;addPick(path,addCard(P,c));return}
+  if(!opt.dataset.q) return;
+  box.innerHTML='<div class="opt none">Searching…</div>';
+  let c;
+  try{c=await lookupOne(opt.dataset.q,t=>{box.innerHTML=`<div class="opt none">${esc(pauseMsg(t))}</div>`})}
+  catch(err){if(pp!==P)return;box.innerHTML=`<div class="opt none">${esc(sfMessage(err))}</div>`;box.hidden=false;return}
+  if(pp!==P) return;
+  if(c&&closeName(opt.dataset.q,c)){addPick(path,addCard(P,c));return}
+  if(c){ui.pending=c;box.innerHTML=`<div class="opt on" data-pending="1"><span>Did you mean “${esc(c.name)}”?</span><small>add it</small></div>`;box.hidden=false;return}
+  box.innerHTML='<div class="opt none">No card found with that name.</div>';box.hidden=false;
+}
+
+/* editor events */
+panel.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.classList.contains('pick-in')){suggest(t);return}
+  const path=t.dataset.bind;if(!path) return;
+  setPath(path,t.type==='checkbox'?t.checked:t.value);
+  touch();
+  const m=path.match(/^(combos|top)\.(\d+)\.title$/);
+  if(m){const el=document.getElementById(`st-${m[1]}-${m[2]}`);if(el)el.textContent=t.value||'Untitled'}
+  if(path==='title') renderPick();
+  if(path==='size'){renderPreview()}
+  if(path==='countdown'||/^sections\.\d+\.on$/.test(path)) renderEditor();
+});
+panel.addEventListener('keydown',e=>{
+  const t=e.target;if(!t.classList.contains('pick-in')) return;
+  const box=$('.sugg',t.parentNode),opts=$$('.opt:not(.none)',box);let i=opts.findIndex(o=>o.classList.contains('on'));
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();if(!opts.length||box.hidden) return;
+    i=(i+(e.key==='ArrowDown'?1:-1)+opts.length)%opts.length;
+    opts.forEach((o,j)=>o.classList.toggle('on',j===i));opts[i].scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'){e.preventDefault();if(!box.hidden&&opts[i])choose(t,opts[i])}
+  else if(e.key==='Escape'){box.hidden=true}
+});
+panel.addEventListener('mousedown',e=>{
+  const o=e.target.closest('.opt');
+  if(o){e.preventDefault();if(!o.classList.contains('none'))choose($('.pick-in',o.closest('.picker')),o)}
+});
+panel.addEventListener('focusout',e=>{
+  const t=e.target;
+  if(t.classList&&t.classList.contains('pick-in')){const box=$('.sugg',t.parentNode);setTimeout(()=>{if(document.activeElement!==t)box.hidden=true},150)}
+});
+panel.addEventListener('focusin',e=>{
+  const it=e.target.closest&&e.target.closest('.item');if(!it) return;
+  const sel=`[data-ref="${it.dataset.ref}"]`;
+  if(!reveal(sel)) ui.want=sel;
+});
+panel.addEventListener('toggle',e=>{
+  const d=e.target;
+  if(d.classList&&d.classList.contains('item')){if(d.open)ui.closed.delete(d.dataset.id);else ui.closed.add(d.dataset.id)}
+},true);
+panel.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b) return;
+  if(b.closest('summary')) e.preventDefault();
+  const a=b.dataset.act,i=+b.dataset.i,path=b.dataset.path;
+  if(a==='load') loadDeck();
+  else if(a==='cmd'){const en=P.deck.find(x=>x.k===b.dataset.k&&x.b===b.dataset.b);if(en){en.cmd=!en.cmd;touch();renderPick();renderEditor()}}
+  else if(a==='fix') fixMissing(i);
+  else if(a==='dropmiss'){P.missing.splice(i,1);touch();renderEditor()}
+  else if(a==='add-combo'){P.combos.push({id:uid(),title:'',cards:[],needs:'',steps:'',result:''});touch();renderEditor();const el=document.getElementById(fid(`combos.${P.combos.length-1}.title`));if(el)el.focus()}
+  else if(a==='add-top'){P.top.push({id:uid(),title:'',cards:[],text:''});touch();renderEditor();const el=document.getElementById(fid(`top.${P.top.length-1}.title`));if(el)el.focus()}
+  else if(a==='add-top10'){for(let j=0;j<10;j++)P.top.push({id:uid(),title:'',cards:[],text:''});P.top.slice(1).forEach(t=>ui.closed.add(t.id));touch();renderEditor()}
+  else if(a==='del'){const arr=getPath(path),[it]=arr.splice(i,1);touch();renderEditor();toast('Removed.',7000,'Undo',()=>{arr.splice(Math.min(i,arr.length),0,it);touch();renderEditor()})}
+  else if(a==='up'||a==='down'){const arr=getPath(path),j=a==='up'?i-1:i+1;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];touch();renderEditor()}
+  else if(a==='unpick'){getPath(path).splice(i,1);touch();renderEditor()}
+});
+$('#tabs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-tab]');if(!b) return;
+  ui.tab=b.dataset.tab;renderTabs();renderEditor();panel.scrollTop=0;
+  if(ui.tab==='deck'||ui.tab==='cover') reveal('');
+  else if(ui.tab!=='pages') reveal(`[data-sec="${ui.tab}"]`,true);
+});
+
+/* top bar */
+$('#pick').addEventListener('change',e=>openPam(e.target.value));
+$('#bNew').onclick=()=>{const p=blank();DB.items[p.id]=p;ui.tab='deck';openPam(p.id);const el=$('#f-deckText');if(el)el.focus()};
+$('#bDup').onclick=()=>{const p=JSON.parse(JSON.stringify(P));p.id=uid();p.updated=Date.now();delete p.example;p.title=pamName(P)+' (copy)';DB.items[p.id]=p;openPam(p.id);toast('Made a copy.')};
+function resetDel(){$('#delwrap').innerHTML='<button class="btn ghost" id="bDel" type="button">Delete</button>';$('#bDel').onclick=askDel}
+let delT=0;
+function askDel(){
+  $('#delwrap').innerHTML=`<span class="delask">Delete “${esc(pamName(P))}”? <button class="btn small danger" id="bDelYes" type="button">Yes, delete</button><button class="btn small ghost" id="bDelNo" type="button">Keep</button></span>`;
+  clearTimeout(delT);delT=setTimeout(resetDel,8000);
+  $('#bDelNo').onclick=()=>{clearTimeout(delT);resetDel()};
+  $('#bDelYes').onclick=()=>{
+    clearTimeout(delT);delete DB.items[P.id];
+    let next=Object.values(DB.items).sort((a,b)=>b.updated-a.updated)[0];
+    if(!next){next=blank();DB.items[next.id]=next}
+    resetDel();openPam(next.id);
+  };
+}
+$('#bDel').onclick=askDel;
+$('#bSave').onclick=()=>{
+  const data=JSON.stringify({app:'deck-pamphlets',v:1,pamphlet:P},null,1);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+  a.download=(pamName(P).replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-')||'deck')+'.pamphlet.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast('Saved as a file. Open it on your other computer with “Open file”.',6000);
+};
+$('#bOpen').onclick=()=>$('#file').click();
+$('#file').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f) return;
+  try{
+    const j=JSON.parse(await f.text()),p=j&&j.app==='deck-pamphlets'&&j.pamphlet;
+    if(!p||typeof p!=='object'||!Array.isArray(p.deck)) throw new Error('not a pamphlet');
+    migrate(p);p.id=p.id||uid();
+    const mine=DB.items[p.id];
+    if(mine&&(mine.updated||0)>(p.updated||0)){p.id=uid();p.title=pamName(p)+' (from file)';toast('The copy in this browser is newer, so the file was opened as a separate pamphlet.',7000)}
+    else toast(mine?'Opened. It replaced the older copy in this browser.':'Opened.',5000);
+    DB.items[p.id]=p;openPam(p.id);
+  }catch(err){toast('That file is not a pamphlet saved from this app.',6000)}
+});
+$('#bMore').onclick=()=>{const on=document.body.classList.toggle('more');$('#bMore').setAttribute('aria-expanded',on)};
+$('#bView').onclick=()=>{const on=document.body.classList.toggle('pv');$('#bView').textContent=on?'Edit':'Preview';if(on)fitPreview()};
+async function toPdf(){
+  renderPreview();
+  toast('Getting the pages ready…',15000);
+  try{await document.fonts.ready}catch(e){}
+  const imgs=$$('#pages img').filter(im=>!im.complete);
+  await Promise.race([Promise.all(imgs.map(im=>new Promise(r=>{im.addEventListener('load',r,{once:true});im.addEventListener('error',r,{once:true})}))),sleep(12000)]);
+  renderPreview();
+  toast('In the print window, choose “Save as PDF” as the printer.',9000);
+  const old=document.title;document.title=pamName(P);
+  window.addEventListener('afterprint',()=>{document.title=old},{once:true});
+  await sleep(60);window.print();
+}
+$('#bPdf').onclick=toPdf;
+window.addEventListener('resize',fitPreview);
+window.addEventListener('beforeunload',()=>{clearTimeout(saveT);saveNow()});
+
+renderAll();saveNow();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>renderPreview());
+if(document.fonts) document.fonts.addEventListener('loadingdone',()=>schedulePreview());
+window.__dp={parseDeck,loadDeck,renderPreview,renderAll,get P(){return P},get DB(){return DB},ui};
+})();
+</script>
+</body>
+</html>

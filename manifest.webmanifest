@@ -1,0 +1,15 @@
+{
+  "name": "Deck Pamphlets",
+  "short_name": "Pamphlets",
+  "description": "Guides for Commander decks: decklist, writeup, combo lines and a top 10, saved as a PDF.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e4e6eb",
+  "theme_color": "#1b2440",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
